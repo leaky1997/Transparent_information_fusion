@@ -4,11 +4,14 @@ import torch.nn.functional as F
 
 # base class for signal processing modules
 class SignalProcessingBase(torch.nn.Module):
-    def __init__(self, input_dim = None, output_dim = None, in_channels = None, args = None):
+    def __init__(self, input_dim = None, output_dim = None,
+                  in_channels = None,out_channel = None,
+                    args = None):
         super(SignalProcessingBase, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.in_channels = in_channels
+        self.out_channel = out_channel
         self.args = args
 
     def forward(self, x):
@@ -91,7 +94,12 @@ class WaveFilters(SignalProcessingBase):
         x_hat = torch.fft.irfft(filtered_freq, dim=1, norm='ortho', n=self.input_dim)
         return x_hat.real
 
+class identity(SignalProcessingBase):
+    def __init__(self, input_dim, in_channels):
+        super(identity, self).__init__(input_dim, input_dim, in_channels)
 
+    def forward(self, x):
+        return x
 
 if __name__ == "__main__":
     # 测试模块
