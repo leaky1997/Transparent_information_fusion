@@ -1,21 +1,32 @@
+from numpy import identity
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 # base class for signal processing modules
 class SignalProcessingBase(torch.nn.Module):
-    def __init__(self, input_dim = None, output_dim = None,
-                  in_channels = None,out_channel = None,
-                    args = None):
+    def __init__(self, args):
         super(SignalProcessingBase, self).__init__()
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-        self.in_channels = in_channels
-        self.out_channel = out_channel
         self.args = args
+        self.in_dim = args.in_dim
+        self.out_dim = args.out_dim
+        self.in_channels = args.in_channels
+        self.out_channels = args.out_channels
+        self.device = args.device
+        self.to(self.device)
+
 
     def forward(self, x):
+        # x should be B,L,C first
         raise NotImplementedError("This method should be implemented by subclass.")
+    
+    def test_forward(self):
+        test_input = torch.randn(2, self.in_dim, self.in_channels)
+        output = self.forward(test_input)
+        assert output.shape == (2, self.out_dim, self.out_channels), f"\
+        input shape is {test_input.shape}, \n\
+        Output shape is {output.shape}, \n\
+        expected {(2, self.out_dim, self.out_channels)}"
 
 class SignalProcessingModuleDict(torch.nn.ModuleDict):
     def __init__(self, module_dict):
@@ -26,14 +37,24 @@ class SignalProcessingModuleDict(torch.nn.ModuleDict):
             return self[key](x)
         else:
             raise KeyError(f"No signal processing module found for key: {key}")
+        
+    def test_forward(self):
+        for key in self.keys():
+            self[key].test_forward()
 
+# TODO
+# SignalProcessingModuleDict_2_arity
 # subclass for FFT module
 
 class FFTSignalProcessing(SignalProcessingBase):
-    def __init__(self, input_dim, in_channels):
+    '''
+    args:
+    input_dim: 输入信号的长度
+    '''
+    def __init__(self, args):
         # FFT 不改变通道数，只改变长度，因此 output_dim = input_dim // 2
-        super(FFTSignalProcessing, self).__init__(input_dim, input_dim // 2, in_channels)
-
+        super(FFTSignalProcessing, self).__init__(args)
+        self.name = "$FFT$"
     def forward(self, x):
         # 假设 x 的形状为 [B, L, C]
         fft_result = torch.fft.rfft(x, dim=1, norm='ortho')  # 对长度L进行FFT
@@ -41,10 +62,10 @@ class FFTSignalProcessing(SignalProcessingBase):
 
 # subclass for Hilbert module
 class HilbertTransform(SignalProcessingBase):
-    def __init__(self, input_dim, in_channels):
+    def __init__(self, args):
         # 希尔伯特变换不改变维度
-        super(HilbertTransform, self).__init__(input_dim, input_dim, in_channels)
-
+        super(HilbertTransform, self).__init__(args)
+        self.name = "HT"
     def forward(self, x):
         N = x.shape[-1]
         Xf = torch.fft.fft(x, dim=1)  # 对最后一个维度执行FFT
@@ -58,10 +79,14 @@ class HilbertTransform(SignalProcessingBase):
     
 # WaveFilters module
 class WaveFilters(SignalProcessingBase):
-    def __init__(self, input_dim, in_channels, args):
-        super(WaveFilters, self).__init__(input_dim, input_dim, in_channels,args)
+    def __init__(self, args):
+        super(WaveFilters, self).__init__(args)
+
+        self.name = "$WF$"
         self.device = args.device
         self.to(self.device)
+        in_channels = args.in_channels
+        in_dim = args.in_dim
         
         # 初始化频率和带宽参数
         self.f_c = nn.Parameter(torch.empty(1, 1,in_channels, device=self.device))
@@ -71,7 +96,7 @@ class WaveFilters(SignalProcessingBase):
         self.initialize_parameters()
         
         # 预生成滤波器
-        self.filters = self.filter_generator(in_channels, input_dim//2 + 1)
+        self.filters = self.filter_generator(in_channels, in_dim//2 + 1)
 
     def initialize_parameters(self):
         # 根据提供的参数初始化f_c和f_b
@@ -94,15 +119,16 @@ class WaveFilters(SignalProcessingBase):
         x_hat = torch.fft.irfft(filtered_freq, dim=1, norm='ortho', n=self.input_dim)
         return x_hat.real
 
-class identity(SignalProcessingBase):
-    def __init__(self, input_dim, in_channels):
-        super(identity, self).__init__(input_dim, input_dim, in_channels)
-
+class Identity(SignalProcessingBase):
+    def __init__(self, args):
+        super(Identity, self).__init__(args)
+        self.name = "$I$"
     def forward(self, x):
         return x
 
 if __name__ == "__main__":
     # 测试模块
+    import copy
     class Args:
         def __init__(self):
             self.device = 'cpu'
@@ -110,21 +136,68 @@ if __name__ == "__main__":
             self.f_c_sigma = 0.01
             self.f_b_mu = 0.1
             self.f_b_sigma = 0.01
+            self.in_dim = 1024
+            self.out_dim = 1024
+            self.in_channels = 10
+            self.out_channels = 10
 
     args = Args()
-    x = torch.randn(2, 1024, 3)
-    fft_module = FFTSignalProcessing(1024, 3)
-    print(fft_module(x).shape)
-    hilbert_module = HilbertTransform(1024, 3)
-    print(hilbert_module(x).shape)
-    wave_filter_module = WaveFilters(1024, 3, args)
-    print(wave_filter_module(x).shape)
+    argsfft = copy.deepcopy(args)
 
+    argsfft.out_dim = argsfft.in_dim // 2 + 1
+
+    fft_module = FFTSignalProcessing(argsfft)
+  
+    hilbert_module = HilbertTransform(args)
+
+    wave_filter_module = WaveFilters(args)
+
+    identity_module = Identity(args)
 
     module_dict = {
-        "$F$": FFTSignalProcessing(1024, 3),
-        "$FO$": WaveFilters(1024, 3, args),
-        "$HT$": HilbertTransform(1024, 3),
+        "$F$": fft_module,
+        "$FO$": hilbert_module,
+        "$HT$": wave_filter_module,
+        "$I$": identity_module,
     }
 
     signal_processing_modules = SignalProcessingModuleDict(module_dict)
+
+    from collections import OrderedDict
+    import pandas as pd
+    import copy
+    class Args:
+        def __init__(self):
+            self.device = 'cpu'
+            self.f_c_mu = 0.1
+            self.f_c_sigma = 0.01
+            self.f_b_mu = 0.1
+            self.f_b_sigma = 0.01
+            self.in_dim = 1024
+            self.out_dim = 1024
+            self.in_channels = 10
+            self.out_channels = 10
+        def save_to_csv(self, filename):
+            df = pd.DataFrame.from_records([self.__dict__])
+            df.to_csv(filename, index=False)
+
+    args = Args()
+    argsfft = copy.deepcopy(args)
+
+    argsfft.out_dim = argsfft.in_dim // 2 + 1
+
+    signal_module_1 = {
+            "$HT$": HilbertTransform(args),
+            "$WF$": WaveFilters(args),
+            "$I$": Identity(args),
+        }
+    ordered_module_dict = OrderedDict(signal_module_1)
+    signal_processing_modules = SignalProcessingModuleDict(signal_module_1)
+
+    signal_module_2 = {
+            "$HT$": HilbertTransform(args),
+            "$WF$": WaveFilters(args),
+            "$I$": Identity(args),
+        }
+    ordered_module_dict = OrderedDict(signal_module_2)
+    signal_processing_modules_2 = SignalProcessingModuleDict(signal_module_2)
