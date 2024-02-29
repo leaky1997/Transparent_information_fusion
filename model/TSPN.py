@@ -21,7 +21,7 @@ class SignalProcessingLayer(nn.Module):
         x = self.weight_connection(normed_x)
 
         # 按模块数拆分
-        splits = torch.split(x, x.size(1) // self.module_num, dim=2)
+        splits = torch.split(x, x.size(2) // self.module_num, dim=2)
 
         # 通过模块计算
         outputs = []
@@ -58,7 +58,10 @@ class Classifier(nn.Module):
     def __init__(self, in_channels, num_classes): # TODO logic
         super(Classifier, self).__init__()
         self.clf = nn.Sequential(
-            nn.Linear(in_channels, num_classes),
+            nn.Linear(in_channels, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, num_classes)
+            
         )
     def forward(self, x):
         x = x.view(x.size(0), -1)
@@ -86,7 +89,7 @@ class Transparent_Signal_Processing_Network(nn.Module):
             self.signal_processing_layers.append(SignalProcessingLayer(self.signal_processing_modules[i],
                                                                        in_channels,
                                                                          out_channels,
-                                                                         self.args.skip_connection))
+                                                                         self.args.skip_connection).to(self.args.device))
             in_channels = out_channels 
             assert out_channels % self.signal_processing_layers[i].module_num == 0 
             out_channels = int(out_channels * self.args.scale)
@@ -112,11 +115,11 @@ class Transparent_Signal_Processing_Network(nn.Module):
         
         return x
 if __name__ == '__main__':
-    from network_config import args
-    from network_config import signal_processing_modules,feature_extractor_modules
+    from config import args
+    from config import signal_processing_modules,feature_extractor_modules
     
     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)
-    x = torch.randn(2, 4096, 2)
+    x = torch.randn(2, 4096, 2).cuda()
     y = net(x)
     print(y.shape)
     

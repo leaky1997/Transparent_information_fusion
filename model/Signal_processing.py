@@ -85,7 +85,7 @@ class WaveFilters(SignalProcessingBase):
         self.name = "$WF$"
         self.device = args.device
         self.to(self.device)
-        in_channels = args.in_channels
+        in_channels = args.in_channels # cout per module_num
         in_dim = args.in_dim
         
         # 初始化频率和带宽参数
@@ -116,7 +116,7 @@ class WaveFilters(SignalProcessingBase):
         # 应用滤波器到所有通道
         filtered_freq = freq * self.filters # B,L//2,C * 1,L//2,c
         
-        x_hat = torch.fft.irfft(filtered_freq, dim=1, norm='ortho', n=self.input_dim)
+        x_hat = torch.fft.irfft(filtered_freq, dim=1, norm='ortho')
         return x_hat.real
 
 class Identity(SignalProcessingBase):
@@ -129,7 +129,7 @@ class Identity(SignalProcessingBase):
 if __name__ == "__main__":
     # 测试模块
     import copy
-    class Args:
+    class SignalProcessingArgs:
         def __init__(self):
             self.device = 'cpu'
             self.f_c_mu = 0.1
@@ -141,7 +141,7 @@ if __name__ == "__main__":
             self.in_channels = 10
             self.out_channels = 10
 
-    args = Args()
+    args = SignalProcessingArgs()
     argsfft = copy.deepcopy(args)
 
     argsfft.out_dim = argsfft.in_dim // 2 + 1
