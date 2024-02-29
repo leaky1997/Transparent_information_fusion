@@ -4,14 +4,14 @@ from altair import AllSortString
 import torch
 from torch import nn
 
-from Signal_processing import SignalProcessingBase,\
+from model.Signal_processing import SignalProcessingBase,\
         SignalProcessingModuleDict,\
         FFTSignalProcessing,\
         HilbertTransform,\
         WaveFilters,\
         Identity
 
-from Feature_extract import FeatureExtractionBase,\
+from model.Feature_extract import FeatureExtractionBase,\
         FeatureExtractionModuleDict,\
         MeanFeature,\
         StdFeature,\
