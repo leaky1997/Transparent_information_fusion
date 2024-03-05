@@ -85,7 +85,7 @@ class WaveFilters(SignalProcessingBase):
         self.name = "$WF$"
         self.device = args.device
         self.to(self.device)
-        in_channels = args.in_channels # cout per module_num
+        in_channels = 200 # large enough to avoid setting
         in_dim = args.in_dim
         
         # 初始化频率和带宽参数
@@ -111,10 +111,11 @@ class WaveFilters(SignalProcessingBase):
         return filters
 
     def forward(self, x): 
+        in_channels = x.shape[-1]
         freq = torch.fft.rfft(x, dim=1, norm='ortho')
         
         # 应用滤波器到所有通道
-        filtered_freq = freq * self.filters # B,L//2,C * 1,L//2,c
+        filtered_freq = freq * self.filters[:,:,:in_channels] # B,L//2,C * 1,L//2,c
         
         x_hat = torch.fft.irfft(filtered_freq, dim=1, norm='ortho')
         return x_hat.real

@@ -82,7 +82,7 @@ class Transparent_Signal_Processing_Network(nn.Module):
     def init_signal_processing_layers(self):
         print('# build signal processing layers')
         in_channels = self.args.in_channels
-        out_channels = self.args.out_channels 
+        out_channels = int(self.args.out_channels * self.args.scale)
 
         self.signal_processing_layers = nn.ModuleList()
         for i in range(self.layer_num):
@@ -92,19 +92,19 @@ class Transparent_Signal_Processing_Network(nn.Module):
                                                                          self.args.skip_connection).to(self.args.device))
             in_channels = out_channels 
             assert out_channels % self.signal_processing_layers[i].module_num == 0 
-            out_channels = int(out_channels * self.args.scale)
-        self.channel_for_feature = out_channels // self.args.scale
+            # out_channels = int(out_channels * self.args.scale)
+        self.channel_for_feature = out_channels # // self.args.scale
 
     def init_feature_extractor_layers(self):
         print('# build feature extractor layers')
-        self.feature_extractor_layers = FeatureExtractorlayer(self.feature_extractor_modules,self.channel_for_feature,self.channel_for_feature)
+        self.feature_extractor_layers = FeatureExtractorlayer(self.feature_extractor_modules,self.channel_for_feature,self.channel_for_feature).to(self.args.device)
         len_feature = len(self.feature_extractor_modules)
         self.channel_for_classifier = self.channel_for_feature * len_feature
 
 
     def init_classifier(self):
         print('# build classifier')
-        self.clf = Classifier(self.channel_for_classifier, self.args.num_classes)
+        self.clf = Classifier(self.channel_for_classifier, self.args.num_classes).to(self.args.device)
 
     def forward(self, x):
 
