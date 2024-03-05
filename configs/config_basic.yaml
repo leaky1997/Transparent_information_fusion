@@ -1,8 +1,9 @@
 signal_processing_configs:
-  layer1: ['$HT$','$WF$','$I$']
-  layer2: ['$HT$','$WF$','$I$']
-  layer3: ['$HT$','$WF$','$I$']
-  layer4: ['$HT$','$WF$','$I$']   
+  layer1: ['HT','WF','I']
+  layer2: ['HT$,'WF','I']
+  # layer2: ['$HT$','$WF$','$I$']
+  # layer3: ['$HT$','$WF$','$I$']
+  # layer4: ['$HT$','$WF$','$I$']   
 
 feature_extractor_configs: ['$Mean$', '$Std$', '$Var$','$Entropy$',
  '$Max$', '$Min$', '$AbsMean$', '$Kurtosis$','$RMS$','$CrestFactor$',

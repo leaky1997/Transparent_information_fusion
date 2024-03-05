@@ -1,6 +1,6 @@
-from ast import arg
+# from ast import arg
 from os import pread
-from altair import AllSortString
+# from altair import AllSortString
 import torch
 from torch import nn
 
@@ -71,7 +71,7 @@ for layer in config['signal_processing_configs'].values():
     signal_module = OrderedDict()
     for module_name in layer:
         module_class = ALL_SP[module_name]
-        signal_module[module_name] = module_class(args)  # 假设所有模块的构造函数不需要参数
+        signal_module[module_name] = module_class(args)  # 假设所有模块的构造函数不需要参数 ,但是有些模块需要参数
     signal_processing_modules.append(SignalProcessingModuleDict(signal_module))
 
 feature_extractor_modules = OrderedDict()

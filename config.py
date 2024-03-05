@@ -58,9 +58,9 @@ from collections import OrderedDict
 import yaml
 from types import SimpleNamespace
 
-
+config_dir = 'configs/config_basic.yaml'
 # 读取YAML文件
-with open('model/config.yaml', 'r') as f:
+with open(config_dir, 'r') as f:
     config = yaml.safe_load(f)
 args = SimpleNamespace(**config['args'])
 
