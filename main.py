@@ -7,17 +7,20 @@ import pytorch_lightning as pl
 
 from torch import seed
 from trainer.trainer_basic import TSPN_trainer
-from config import args
-from config import signal_processing_modules,feature_extractor_modules
+from configs.config import args
+from configs.config import signal_processing_modules,feature_extractor_modules
 
 #data
 from data.data_provider import get_data
-
+import os
 
 seed_everything(17)
-name = f'num{args.num}_model{args.model}_dataset{args.dataset}_dim{args.dim}_depth{args.depth}\
-    _task_list{args.task_list}_lr{args.lr}_mask{args.mask}_epoches{args.epoches}_seed{args.seed}/'
+
+name = f'lr{args.learning_rate}_epochs{args.num_epochs}_seed{args.seed}_scale{args.scale}'
+print(f'Running experiment: {name}')
 path = 'save/' + name
+if not os.path.exists(path):
+    os.makedirs(path)
 # 初始化模型
 model = TSPN_trainer(signal_processing_modules, feature_extractor_modules, args)
 
@@ -33,7 +36,7 @@ checkpoint_callback = ModelCheckpoint(
 # 初始化训练器
 trainer = pl.Trainer(callbacks=[checkpoint_callback],
                      max_epochs=args.num_epochs,
-                     logger=CSVLogger(path))
+                     logger=CSVLogger(path, name = 'logs'))
 
 # dataset
 train_dataloader, val_dataloader, test_dataloader = get_data(args)

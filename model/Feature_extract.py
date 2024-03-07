@@ -38,7 +38,7 @@ class MeanFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.mean(x, dim=-1, keepdim=True),
         )
-        self.name = "$Mean$"
+        self.name = "Mean"
         
 # Std        
 class StdFeature(FeatureExtractionBase):
@@ -47,7 +47,7 @@ class StdFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.std(x, dim=-1, keepdim=True)
         )
-        self.name = "$Std$"
+        self.name = "Std"
 # Var
 class VarFeature(FeatureExtractionBase):
     def __init__(self):
@@ -55,7 +55,7 @@ class VarFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.var(x, dim=-1, keepdim=True)
         )
-        self.name = "$Var$"
+        self.name = "Var"
 #  Entropy
 class EntropyFeature(FeatureExtractionBase):
     def __init__(self):
@@ -63,7 +63,7 @@ class EntropyFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: (x * torch.log(torch.softmax(x, dim=-1))).mean(dim=-1, keepdim=True)
         )
-        self.name = "$Entropy$"
+        self.name = "Entropy"
 # Max
 class MaxFeature(FeatureExtractionBase):
     def __init__(self):
@@ -71,7 +71,7 @@ class MaxFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.max(x, dim=-1, keepdim=True)[0]  # 返回值和索引，这里只取值
         )
-        self.name = "$Max$"
+        self.name = "Max"
 # Min
 class MinFeature(FeatureExtractionBase):
     def __init__(self):
@@ -79,7 +79,7 @@ class MinFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.min(x, dim=-1, keepdim=True)[0]  # 返回值和索引，这里只取值
         )
-        self.name = "$Min$"
+        self.name = "Min"
 # AbsMax        
 class AbsMeanFeature(FeatureExtractionBase):
     def __init__(self):
@@ -87,7 +87,7 @@ class AbsMeanFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.mean(torch.abs(x), dim=-1, keepdim=True)
         )
-        self.name = "$AbsMean$"
+        self.name = "AbsMean"
 # Kurtosis        
 class KurtosisFeature(FeatureExtractionBase):
     def __init__(self):
@@ -96,7 +96,7 @@ class KurtosisFeature(FeatureExtractionBase):
             lambda x: (((x - torch.mean(x, dim=-1, keepdim=True)) ** 4).mean(dim=-1, keepdim=True)) /
                       (torch.var(x, dim=-1, keepdim=True) ** 2)
         )
-        self.name = "$Kurtosis$"
+        self.name = "Kurtosis"
 # RMS
 class RMSFeature(FeatureExtractionBase):
     def __init__(self):
@@ -104,7 +104,7 @@ class RMSFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.sqrt(torch.mean(x ** 2, dim=-1, keepdim=True))
         )
-        self.name = "$RMS$"
+        self.name = "RMS"
 # CrestFactor
 class CrestFactorFeature(FeatureExtractionBase):
     def __init__(self):
@@ -112,7 +112,7 @@ class CrestFactorFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.max(x, dim=-1, keepdim=True)[0] / torch.sqrt(torch.mean(x ** 2, dim=-1, keepdim=True))
         )
-        self.name = "$CrestFactor$"
+        self.name = "CrestFactor"
 # ClearanceFactor        
 class ClearanceFactorFeature(FeatureExtractionBase):
     def __init__(self):
@@ -120,7 +120,7 @@ class ClearanceFactorFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.max(x, dim=-1, keepdim=True)[0] / torch.mean(torch.abs(x), dim=-1, keepdim=True)
         )
-        self.name = "$ClearanceFactor$"
+        self.name = "ClearanceFactor"
 # Skewness
 class SkewnessFeature(FeatureExtractionBase):
     def __init__(self):
@@ -129,7 +129,7 @@ class SkewnessFeature(FeatureExtractionBase):
             lambda x: ((x - torch.mean(x, dim=-1, keepdim=True)) ** 3).mean(dim=-1, keepdim=True) /
                       (torch.std(x, dim=-1, keepdim=True) ** 3)
         )
-        self.name = "$Skewness$"
+        self.name = "Skewness"
 # ShapeFactor
 class ShapeFactorFeature(FeatureExtractionBase):
     def __init__(self):
@@ -137,7 +137,7 @@ class ShapeFactorFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.sqrt(torch.mean(x ** 2, dim=-1, keepdim=True)) / torch.mean(torch.abs(x), dim=-1, keepdim=True)
         )
-        self.name = "$ShapeFactor$"
+        self.name = "ShapeFactor"
 # CrestFactorDelta
 class CrestFactorDeltaFeature(FeatureExtractionBase):
     def __init__(self):
@@ -145,7 +145,7 @@ class CrestFactorDeltaFeature(FeatureExtractionBase):
         self.register_feature_method(
             lambda x: torch.sqrt(torch.mean(torch.pow(x[:,:, 1:] - x[:,:, :-1], 2), dim=-1, keepdim=True)) / torch.mean(torch.abs(x), dim=-1, keepdim=True)
         )
-        self.name = "$CrestFactorDelta$"
+        self.name = "CrestFactorDelta"
 # KurtosisDelta
 class KurtosisDeltaFeature(FeatureExtractionBase):
     def __init__(self):
@@ -154,7 +154,7 @@ class KurtosisDeltaFeature(FeatureExtractionBase):
             lambda x: (((x[:,:, 1:] - x[:,:, :-1] - torch.mean(x[:,:, 1:] - x[:,:, :-1], dim=-1, keepdim=True)) ** 4).mean(dim=-1, keepdim=True)) /
                       (((x[:,:, 1:] - x[:,:, :-1] - torch.mean(x[:,:, 1:] - x[:,:, :-1], dim=-1, keepdim=True)) ** 2).mean(dim=-1, keepdim=True) ** 2)
         )
-        self.name = "$KurtosisDelta$"
+        self.name = "KurtosisDelta"
 
 
 

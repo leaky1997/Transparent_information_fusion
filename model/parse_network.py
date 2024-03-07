@@ -104,8 +104,8 @@ def draw_classifier_layer(G,layer,input_nodes):
 
 if __name__ == '__main__':
     # 示例参数
-    from config import args
-    from config import signal_processing_modules,feature_extractor_modules
+    from configs.config import args
+    from configs.config import signal_processing_modules,feature_extractor_modules
     from TSPN import Transparent_Signal_Processing_Network
     import torch
     
@@ -125,4 +125,4 @@ if __name__ == '__main__':
     }
 
     # 调用函数进行测试
-    draw_network(net, x)
+    # draw_network(net, x)

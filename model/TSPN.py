@@ -115,8 +115,8 @@ class Transparent_Signal_Processing_Network(nn.Module):
         
         return x
 if __name__ == '__main__':
-    from config import args
-    from config import signal_processing_modules,feature_extractor_modules
+    from configs.config import args
+    from configs.config import signal_processing_modules,feature_extractor_modules
     
     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)
     x = torch.randn(2, 4096, 2).cuda()
