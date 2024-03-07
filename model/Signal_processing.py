@@ -60,7 +60,7 @@ class FFTSignalProcessing(SignalProcessingBase):
         fft_result = torch.fft.rfft(x, dim=1, norm='ortho')  # 对长度L进行FFT
         return fft_result
 
-# subclass for Hilbert module
+# ############################################## subclass for Hilbert module###############################################  
 class HilbertTransform(SignalProcessingBase):
     def __init__(self, args):
         # 希尔伯特变换不改变维度
@@ -77,12 +77,12 @@ class HilbertTransform(SignalProcessingBase):
             Xf[..., (N + 1) // 2:] = 0
         return torch.fft.ifft(Xf, dim=1).abs()
     
-# WaveFilters module
+###############################################  WaveFilters module############################################## 
 class WaveFilters(SignalProcessingBase):
     def __init__(self, args):
         super(WaveFilters, self).__init__(args)
 
-        self.name = "$WF$"
+        self.name = "WF"
         self.device = args.device
         self.to(self.device)
         in_channels = 200 # large enough to avoid setting
@@ -120,10 +120,12 @@ class WaveFilters(SignalProcessingBase):
         x_hat = torch.fft.irfft(filtered_freq, dim=1, norm='ortho')
         return x_hat.real
 
+
+############################################## Identity module #######################################
 class Identity(SignalProcessingBase):
     def __init__(self, args):
         super(Identity, self).__init__(args)
-        self.name = "$I$"
+        self.name = "I"
     def forward(self, x):
         return x
 

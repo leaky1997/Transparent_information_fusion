@@ -1,23 +1,23 @@
 from torch.utils.data import DataLoader
-from data.datasets import data_default
+from data.datasets import THU_VibVoltageDataset
 
-def get_data(args):
+def get_data(args,dataset_class = THU_VibVoltageDataset):
 
-    dataset = data_default(args.data_dir,flag = 'train')
+    dataset = dataset_class(args.data_dir,flag = 'train')
     train_loader = DataLoader(
         dataset = dataset,
         batch_size= args.batch_size,
         shuffle = True,
         num_workers = args.num_workers
     )
-    dataset = data_default(args.data_dir,flag = 'val')
+    dataset = dataset_class(args.data_dir,flag = 'val')
     val_loader = DataLoader(
         dataset = dataset,
         batch_size= args.batch_size,
         shuffle = False,
         num_workers = args.num_workers
     )
-    dataset = data_default(args.data_dir,flag = 'test')
+    dataset = dataset_class(args.data_dir,flag = 'test')
     test_loader = DataLoader(
         dataset = dataset,
         batch_size= args.batch_size,
