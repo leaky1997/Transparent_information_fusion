@@ -33,7 +33,7 @@ args:
   out_dim : 4096
   in_channels : 2
   out_channels : 3
-  scale : 2
+  scale : 4
 
   f_c_mu: 0
   f_c_sigma: 0.1

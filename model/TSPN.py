@@ -118,12 +118,17 @@ class Transparent_Signal_Processing_Network(nn.Module):
 if __name__ == '__main__':
     from config import args
     from config import signal_processing_modules,feature_extractor_modules
-    
+    import torchinfo
     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)
     x = torch.randn(2, 4096, 2).cuda()
     y = net(x)
     print(y.shape)
-
+    
+    net_summaary= torchinfo.summary(net.cuda(),(2,4096,2),device = "cuda")
+    print(net_summaary)
+    with open(f'save/TSPN.txt','w') as f:
+        f.write(str(net_summaary))      
+        
     args = {
         'in_channels': 2,
         'out_channels': 6,  # 这应该与您网络设计中的输出通道数一致
