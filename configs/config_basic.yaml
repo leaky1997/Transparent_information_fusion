@@ -3,6 +3,9 @@ signal_processing_configs:
   layer2: ['HT','WF','I']
   layer3: ['HT','WF','I']
   layer4: ['HT','WF','I']
+
+  # layer1: ['HT','I']
+  # layer2: ['HT','I']
   # layer2: ['$HT$','$WF$','$I$']
   # layer3: ['$HT$','$WF$','$I$']
   # layer4: ['$HT$','$WF$','$I$']   
@@ -17,7 +20,10 @@ args:
 
   device: cuda
 # data
-
+  # data_dir: '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/1hz'
+  # data_dir: '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/10hz'
+  # data_dir: '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/15hz'
+  data_dir: '/home/user/data/a_bearing/a_018_THU24_pro/IF'
 
 
 # model
@@ -37,7 +43,14 @@ args:
 # hyperparameter
   learning_rate: 0.001
   batch_size: 64
-  num_epochs: 10
+  num_epochs: 100
   weight_decay: 0.0001
-  num_workers: 4
+  num_workers: 32
   seed: 17
+
+# train
+  monitor: 'val_loss'
+  patience: 8
+  gpus: 8
+  weight_decay: 0.0001
+  l1_norm: 0.01

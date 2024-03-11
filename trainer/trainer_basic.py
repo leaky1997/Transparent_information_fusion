@@ -9,37 +9,73 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import torchmetrics
+from .utils import l1_reg
+
 
 class TSPN_trainer(pl.LightningModule):
     def __init__(self, signal_processing_modules, feature_extractor_modules, args):
         super().__init__()
         self.network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules, args)
         self.args = args
-
+        self.loss = nn.CrossEntropyLoss()
+        self.acc_val = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classes)
+        self.acc_train = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classes)
+        self.acc_test = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classses)
+        
+        self.save_hyperparameters()
+        
+        
+        print('### network:\n',self.network)
     def forward(self, x):
+        
         return self.network(x)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        loss = nn.CrossEntropyLoss()(y_hat, y)
-        self.log('train_loss', loss)
+        loss = self.loss(y_hat, y.long())
+        self.acc_train(y_hat, y.long())
+        
+        self.log('train_loss', loss,on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_acc', self.acc_train, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        
+        regularization_loss = 0
+        if self.args.l1_norm > 0: # l1 regularization
+            for param in self.network.parameters():
+                regularization_loss += l1_reg(param = param) 
+            
+            loss += self.args.l1_norm * regularization_loss          
+            self.log('l1_loss_', regularization_loss,prog_bar =True)    
+        
+        
         return loss
+    
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
-        val_loss = nn.CrossEntropyLoss()(y_hat, y)
+        val_loss = self.loss(y_hat, y.long())
+        self.acc_val(y_hat, y.long())
         self.log('val_loss', val_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('val_acc', self.acc_val, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return val_loss
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        test_loss = self.loss(y_hat, y.long())
+        self.log('test_loss', test_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.acc_test(y_hat, y.long())
+        self.log('test_acc', self.acc_test, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return test_loss
     
     def configure_optimizers(self):
         '''defines model optimizer'''
-        optimizer = Adam(self.parameters(), lr=self.lr)
+        optimizer = Adam(self.parameters(), lr=self.args.learning_rate, weight_decay = self.args.weight_decay)
         out = {
         "optimizer": optimizer,
         "lr_scheduler": {
             "scheduler": ReduceLROnPlateau(optimizer),
-            "monitor": self.args.monitor + '_' + self.args.task_list[-1],
+            "monitor": self.args.monitor ,
             "frequency": self.args.patience//2
 
             },
