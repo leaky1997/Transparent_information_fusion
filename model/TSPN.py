@@ -59,9 +59,9 @@ class Classifier(nn.Module):
     def __init__(self, in_channels, num_classes): # TODO logic
         super(Classifier, self).__init__()
         self.clf = nn.Sequential(
-            nn.Linear(in_channels, 1024),
+            nn.Linear(in_channels, 128),
             nn.ReLU(),
-            nn.Linear(1024, num_classes)
+            nn.Linear(128, num_classes)
             
         )
     def forward(self, x):
