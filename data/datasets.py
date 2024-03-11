@@ -8,8 +8,8 @@ from torch.utils.data import Dataset
 class THU_VibVoltageDataset(Dataset):
     def __init__(self, data_dir, flag='train', task='1hz', transform=None): # 1hz, 10hz, 15hz,IF
         # Load data and labels 
-        self.data = np.load(data_dir + '_data.npy')
-        self.labels = np.load(data_dir + '_label.npy')
+        self.data = np.load(data_dir + '_data.npy').astype(np.float32)
+        self.labels = np.load(data_dir + '_label.npy').astype(np.float32)
         self.transform = transform
 
         # Define split ratios
@@ -126,6 +126,10 @@ if __name__ == '__main__':
     test_dataset = THU_VibVoltageDataset(data_dir=data_dir, flag='test', task='15hz')
 
     IF_data_set = THU_VibVoltageDataset(data_dir='/home/user/data/a_bearing/a_018_THU24_pro/IF', flag='train', task='IF')
+    print(len(train_dataset))
+    print(len(val_dataset))
+    print(len(test_dataset))
+    print(len(IF_data_set))
     
     # 创建DataLoader以便批量加载数据
     train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
@@ -136,6 +140,7 @@ if __name__ == '__main__':
     # 展示训练集中的一些样本
     print("Training samples:")
     for data, labels in train_loader:
+        
         print("Data batch shape:", data.shape)
         print("Labels batch shape:", labels.shape)
         break  # 只展示第一个批次

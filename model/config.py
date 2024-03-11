@@ -27,25 +27,25 @@ from Feature_extract import FeatureExtractionBase,\
         ClearanceFactorFeature,\
         ShapeFactorFeature
 ALL_SP = {
-    '$FFT$': FFTSignalProcessing,
-    '$HT$': HilbertTransform,
-    '$WF$': WaveFilters,
-    '$I$':Identity,
+    'FFT': FFTSignalProcessing,
+    'HT': HilbertTransform,
+    'WF': WaveFilters,
+    'I': Identity,
 }
 ALL_FE = {
-    '$Mean$': MeanFeature,
-    '$Std$': StdFeature,
-    '$Var$': VarFeature,
-    '$Entropy$': EntropyFeature,
-    '$Max$': MaxFeature,
-    '$Min$': MinFeature,
-    '$AbsMean$': AbsMeanFeature,
-    '$Kurtosis$': KurtosisFeature,
-    '$RMS$': RMSFeature,
-    '$CrestFactor$': CrestFactorFeature,
-    '$Skewness$': SkewnessFeature,
-    '$ClearanceFactor$': ClearanceFactorFeature,
-    '$ShapeFactor$': ShapeFactorFeature,
+    'Mean': MeanFeature,
+    'Std': StdFeature,
+    'Var': VarFeature,
+    'Entropy': EntropyFeature,
+    'Max': MaxFeature,
+    'Min': MinFeature,
+    'AbsMean': AbsMeanFeature,
+    'Kurtosis': KurtosisFeature,
+    'RMS': RMSFeature,
+    'CrestFactor': CrestFactorFeature,
+    'Skewness': SkewnessFeature,
+    'ClearanceFactor': ClearanceFactorFeature,
+    'ShapeFactor': ShapeFactorFeature,
 }
 # logic
 

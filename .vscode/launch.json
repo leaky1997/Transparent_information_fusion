@@ -12,6 +12,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "python": "/home/user/anaconda3/envs/LQ1/bin/python",
+            // "justMyCode": false
+
         }
     ]
 }

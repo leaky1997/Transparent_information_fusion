@@ -1,4 +1,5 @@
 
+from scipy import optimize
 import torch 
 import torch.nn as nn
 from einops import rearrange
@@ -115,11 +116,78 @@ class Transparent_Signal_Processing_Network(nn.Module):
         
         return x
 if __name__ == '__main__':
-    from configs.config import args
-    from configs.config import signal_processing_modules,feature_extractor_modules
+    from config import args
+    from config import signal_processing_modules,feature_extractor_modules
     
     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)
     x = torch.randn(2, 4096, 2).cuda()
     y = net(x)
     print(y.shape)
-    
+
+    args = {
+        'in_channels': 2,
+        'out_channels': 6,  # 这应该与您网络设计中的输出通道数一致
+        'scale': 1,  # 根据您的模型具体需要调整
+        'num_classes': 5,  # 假设有5个类别
+        'learning_rate': 0.001,
+        'num_epochs': 100
+    }
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    optimizer = optim.Adam(net.parameters(), lr=args['learning_rate'])
+    loss_fn = nn.CrossEntropyLoss()
+
+    # 模拟训练数据和标签
+    def generate_random_data(batch_size, length, input_channels):
+        data = torch.randn(batch_size, length, input_channels)
+        labels = torch.randint(0, args['num_classes'], (batch_size,))
+        return data, labels
+
+    # 训练循环
+    for epoch in range(args['num_epochs']):
+        net.train()
+        data, labels = generate_random_data(32, 4096, args['in_channels'])  # 假设序列长度为100
+        data, labels = data.cuda(), labels.cuda()
+        optimizer.zero_grad()
+        outputs = net(data)
+        loss = loss_fn(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        
+        if epoch % 10 == 0:  # 每10轮输出一次损失
+            print(f"Epoch {epoch}, Loss: {loss.item()}")    
+# def test_backward():
+#     from config import args
+#     from config import signal_processing_modules,feature_extractor_modules
+
+#     # 创建网络
+#     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args).cuda()
+#     optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+#     # 创建随机输入和目标输出
+#     x = torch.randn(2, 4096, 2).cuda()
+#     target = torch.randint(0, args.num_classes, (2,)).cuda()
+
+#     # 计算网络的输出
+#     output = net(x)
+
+#     # 计算损失
+#     criterion = nn.CrossEntropyLoss()
+#     loss = criterion(output, target)
+#     optimizer.zero_grad()
+#     loss.backward()
+#     optimizer.step()
+
+#     # 反向传播
+#     optimizer.zero_grad()
+#     loss.backward()
+#     optimizer.step()
+
+#     # 检查梯度
+#     for name, param in net.named_parameters():
+#         assert param.grad is not None, f'No gradient for {name} in backward'
+
+#     print('Backward pass test passed.')
+
+# if __name__ == '__main__':
+#     test_backward()
