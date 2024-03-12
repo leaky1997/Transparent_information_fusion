@@ -55,6 +55,7 @@ ALL_FE = {
 
 def parse_arguments(parser):
     # 解析参数
+    
     args_dir = parser.parse_args()
     # 使用参数
     yaml_dir = args_dir.config_dir
@@ -64,16 +65,34 @@ def parse_arguments(parser):
     args = SimpleNamespace(**config['args'])
 
     
-    dataset = args.data_dir[-3:].replace('/','')
+    # dataset = args.data_dir[-3:].replace('/','')
     time_stamp = time.strftime("%Y-%m-%d-%H-%M", time.localtime())
-    name = f'time{time_stamp}_model{args.model}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_l1norm{args.l1_norm}_dataset{dataset}_seed{args.seed}'
+    name = f'time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_l1norm{args.l1_norm}_dataset{args.dataset_task}_seed{args.seed}'
 
     print(f'Running experiment: {name}')
-    path = 'save/' + name
+    path = 'save/' + f'model_{args.model}/' + name
     if not os.path.exists(path):
         os.makedirs(path)
     
-    return config,args, path
+    return config,args,path
+
+def yaml_arguments(yaml_dir):
+    # 读取YAML文件
+    with open(yaml_dir, 'r') as f:
+        config = yaml.safe_load(f)
+    args = SimpleNamespace(**config['args'])
+
+    
+    # dataset = args.data_dir[-3:].replace('/','')
+    time_stamp = time.strftime("%Y-%m-%d-%H-%M", time.localtime())
+    name = f'time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_l1norm{args.l1_norm}_dataset{args.dataset_task}_seed{args.seed}'
+
+    print(f'Running experiment: {name}')
+    path = 'save/' + f'model_{args.model}/' + name
+    if not os.path.exists(path):
+        os.makedirs(path)
+    
+    return config,args,path
 
 def config_network(config,args):
     

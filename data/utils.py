@@ -13,6 +13,6 @@ class AddNoiseTransform:
 
     def __call__(self, x):
         self.snr = 10**(self.snr/10.0)
-        xpower = torch.sum(x**2)/(x.size(0)*x.size(1)*x.size(2))
-        npower = xpower / snr
-        return torch.rand(x.size()).cuda() * torch.sqrt(npower)
+        xpower = torch.sum(x**2)/(x.size(0)*x.size(1))
+        npower = xpower / self.snr
+        return torch.rand(x.size()) * torch.sqrt(npower) + x
