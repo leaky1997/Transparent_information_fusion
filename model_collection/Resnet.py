@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import torch.nn.functional as F
 import math
-
+from einops import rearrange
 
 def conv3x1(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -314,6 +314,8 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        
+        x = rearrange(x, 'b c n -> b n c')
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)

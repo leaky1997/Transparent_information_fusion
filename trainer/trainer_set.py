@@ -7,9 +7,8 @@ import pytorch_lightning as pl
 from lightning.pytorch import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger
 
-from torch.utils.tensorboard import SummaryWriter   
-# trainer = Trainer(logger=logger)
-# from utils import compute_amount
+from torch.utils.tensorboard.writer import SummaryWriter   
+
 
 ############### data ###############
 from data.data_provider import get_data
@@ -23,31 +22,28 @@ def trainer_set(args,path):
         mode='min',
         dirpath = path
     )
+    def compute_amount(epoch):
+        # the sum of all returned values need to be smaller than 1
+        if epoch == args.num_epochs//4:
+            return args.pruning[0]
+        elif epoch == args.num_epochs//2:
+            return args.pruning[1]
+        elif 3 * args.num_epochs//4 < epoch:
+            return args.pruning[2]
+        
     if isinstance(args.pruning, (int, float)):
-        
-        prune_callback = ModelPruning("l1_unstructured", amount=args.pruning)
+        prune_callback = ModelPruning("l1_unstructured",parameter_names = ['weight'], amount=args.pruning)
     elif isinstance(args.pruning, list):
-        
-        def compute_amount(epoch):
-            # the sum of all returned values need to be smaller than 1
-            if epoch == args.num_epochs//4:
-                return args.pruning[0]
-            elif epoch == args.num_epochs//2:
-                return args.pruning[1]
-            elif 3 * args.num_epochs//4 < epoch :
-                return args.pruning[2]
-            
-        prune_callback = ModelPruning("l1_unstructured", amount=compute_amount)
-    elif args.pruning is None:
-        pass
+        prune_callback = ModelPruning("l1_unstructured", amount = compute_amount)
+    else:
+        prune_callback = None
     
-    callback_list = [checkpoint_callback,prune_callback] if args.pruning is not None else [checkpoint_callback]
-    log_list = [CSVLogger(path, name="logs"),TensorBoardLogger(path, name="logs")]
     # 初始化训练器
-    trainer = pl.Trainer(callbacks=callback_list,
+    trainer = pl.Trainer(callbacks=[checkpoint_callback] if prune_callback is None else [checkpoint_callback,prune_callback],
                         max_epochs=args.num_epochs,
                         devices= args.gpus,
-                        logger = log_list,
+                        logger = [CSVLogger(path, name="logs"),TensorBoardLogger(path, name="logs")],
                         log_every_n_steps=1,)
+    
     train_dataloader, val_dataloader, test_dataloader = get_data(args)
     return trainer,train_dataloader, val_dataloader, test_dataloader

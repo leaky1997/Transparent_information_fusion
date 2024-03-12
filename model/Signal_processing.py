@@ -54,7 +54,7 @@ class FFTSignalProcessing(SignalProcessingBase):
     def __init__(self, args):
         # FFT 不改变通道数，只改变长度，因此 output_dim = input_dim // 2
         super(FFTSignalProcessing, self).__init__(args)
-        self.name = "$FFT$"
+        self.name = "FFT"
     def forward(self, x):
         # 假设 x 的形状为 [B, L, C]
         fft_result = torch.fft.rfft(x, dim=1, norm='ortho')  # 对长度L进行FFT
