@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from pytorch_wavelets import DWT1DForward, DWT1DInverse  # or simply DWT1D, IDWT1D
 import ptwt
+from einops import rearrange
 #%% wanghuan‘ work
 
 
@@ -84,6 +85,7 @@ class Huan_net(nn.Module):
         
     def forward(self, input):
         
+        input = rearrange(input, 'b l c -> b c l')
         DMT_yl,DMT_yh = self.DWT0(input)
         output = torch.cat([DMT_yl,DMT_yh[0]], dim=1)
         
@@ -112,3 +114,11 @@ class Huan_net(nn.Module):
         output = self.fc(output)
         
         return output
+    
+if __name__ == '__main__':
+    model = Huan_net(input_size=2, num_class=4).cuda()
+    print(model)
+    input = torch.rand(2,4096,2).cuda()
+    output = model(input)
+    print(output.size())
+    print(output)

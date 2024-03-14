@@ -11,7 +11,7 @@ feature_extractor_configs: ['Mean', 'Std', 'Var', 'Entropy','Max', 'Min', 'AbsMe
 # logical_configs:
 
 args:
-
+  # debug: True
   device: cuda
 ###################### data ##################
 

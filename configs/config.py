@@ -70,6 +70,8 @@ def parse_arguments(parser):
     name = f'time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_l1norm{args.l1_norm}_dataset{args.dataset_task}_seed{args.seed}'
 
     print(f'Running experiment: {name}')
+    
+    # if args.debug != 'True':
     path = 'save/' + f'model_{args.model}/' + name
     if not os.path.exists(path):
         os.makedirs(path)

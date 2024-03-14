@@ -66,7 +66,7 @@ class Basic_trainer(pl.LightningModule):
         self.log('test_loss', test_loss,  on_epoch=True, prog_bar=True, logger=True)
         acc = self.acc_test(y_hat, y.long())
         self.log('test_acc', acc,  on_epoch=True, prog_bar=True, logger=True)
-        # return test_loss
+        return {'test_acc': acc, 'test_loss': test_loss}
     
     def configure_optimizers(self):
         '''defines model optimizer'''
@@ -81,5 +81,6 @@ class Basic_trainer(pl.LightningModule):
             },
         }
         return out
+
 
 

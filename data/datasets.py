@@ -16,40 +16,40 @@ class THU_006or018_basic(Dataset):
         self.labels = np.load(data_dir + target + '_label.npy').astype(np.float32)
         
     def data_create(self):
-        # Define split ratios
-        # train_ratio = 0.6
-        # val_ratio = 0.1
-        # # Calculate test_ratio to ensure ratios sum to 1
-        # test_ratio = 1 - (train_ratio + val_ratio)
+       #  Define split ratios
+        train_ratio = 0.6
+        val_ratio = 0.1
+        # Calculate test_ratio to ensure ratios sum to 1
+        test_ratio = 1 - (train_ratio + val_ratio)
 
-        # # Split indices for each label
-        # train_indices, val_indices, test_indices = [], [], []
-        # for label in np.unique(self.labels):
-        #     label_indices = np.where(self.labels == label)[0]
-        #     # np.random.shuffle(label_indices)
+        # Split indices for each label
+        train_indices, val_indices, test_indices = [], [], []
+        for label in np.unique(self.labels):
+            label_indices = np.where(self.labels == label)[0]
+            # np.random.shuffle(label_indices)
             
-        #     n_train = int(len(label_indices) * train_ratio)
-        #     n_val = int(len(label_indices) * val_ratio)
-        #     # Remaining indices are for testing
-        #     n_test = len(label_indices) - n_train - n_val
+            n_train = int(len(label_indices) * train_ratio)
+            n_val = int(len(label_indices) * val_ratio)
+            # Remaining indices are for testing
+            n_test = len(label_indices) - n_train - n_val
 
-        #     # Append indices for each set
-        #     train_indices.extend(label_indices[:n_train])
-        #     val_indices.extend(label_indices[n_train:n_train + n_val])
-        #     test_indices.extend(label_indices[n_train + n_val:])
+            # Append indices for each set
+            train_indices.extend(label_indices[:n_train])
+            val_indices.extend(label_indices[n_train:n_train + n_val])
+            test_indices.extend(label_indices[n_train + n_val:])
 
-        # # Select indices based on the flag
-        # if self.flag == 'train':
-        #     selected_indices = train_indices
-        # elif self.flag == 'val':
-        #     selected_indices = val_indices
-        # elif self.flag == 'test':
-        #     selected_indices = test_indices
-        # else:
-        #     raise ValueError("Invalid flag. Please choose from 'train', 'val', or 'test'.")
+        # Select indices based on the flag
+        if self.flag == 'train':
+            selected_indices = train_indices
+        elif self.flag == 'val':
+            selected_indices = val_indices
+        elif self.flag == 'test':
+            selected_indices = test_indices
+        else:
+            raise ValueError("Invalid flag. Please choose from 'train', 'val', or 'test'.")
 
-        # self.selected_data = self.data[selected_indices]
-        # self.selected_labels = self.labels[selected_indices]
+        self.selected_data = self.data[selected_indices]
+        self.selected_labels = self.labels[selected_indices]
 #######################################################################################################        
         # train_data, test_data, train_labels, test_labels = train_test_split(self.data, self.labels, test_size=0.8, random_state=42)
         # if self.flag == 'train':
@@ -59,8 +59,8 @@ class THU_006or018_basic(Dataset):
         #     self.selected_data = test_data
         #     self.selected_labels = test_labels
 ####################################################
-        self.selected_data = self.data
-        self.selected_labels = self.labels
+        # self.selected_data = self.data
+        # self.selected_labels = self.labels
 
     def __len__(self):
         return len(self.selected_data)
