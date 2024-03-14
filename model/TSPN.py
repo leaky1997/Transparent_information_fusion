@@ -4,6 +4,25 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 
+class CustomBatchNorm(nn.Module):
+    def __init__(self, num_features, eps=0.1):
+        super(CustomBatchNorm, self).__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.register_buffer('running_mean', torch.zeros(1,num_features))
+        self.register_buffer('running_var', torch.ones(1,num_features))
+
+    def forward(self, x):
+        if self.training:
+            mean = x.mean(dim=0)
+            var = x.var(dim=0, unbiased=False)
+            self.running_mean = (1 - self.eps) * self.running_mean + self.eps * mean
+            self.running_var = (1 - self.eps) * self.running_var + self.eps * var
+            out = (x - mean) / (var.sqrt() + self.eps)
+        else:
+            out = (x - self.running_mean) / (self.running_var.sqrt() + self.eps)
+        return out
+
 class SignalProcessingLayer(nn.Module):
     def __init__(self, signal_processing_modules, input_channels, output_channels,skip_connection=True):
         super(SignalProcessingLayer, self).__init__()
@@ -39,12 +58,15 @@ class FeatureExtractorlayer(nn.Module):
         super(FeatureExtractorlayer, self).__init__()
         self.weight_connection = nn.Linear(in_channels, out_channels)
         self.feature_extractor_modules = feature_extractor_modules
-
-    def norm(self,x): # feature normalization
-        mean = x.mean(dim = 0,keepdim = True)
-        std = x.std(dim = 0,keepdim = True)
-        out = (x-mean)/(std + 1e-10)
-        return out
+        
+        out_channels = int(len(feature_extractor_modules) * out_channels)
+        
+        self.norm = CustomBatchNorm(out_channels)
+    # def norm(self,x): # feature normalization
+    #     mean = x.mean(dim = 0,keepdim = True)
+    #     std = x.std(dim = 0,keepdim = True)
+    #     out = (x-mean)/(std + 1e-10)
+    #     return out
            
     def forward(self, x):
         x = self.weight_connection(x)
@@ -52,7 +74,7 @@ class FeatureExtractorlayer(nn.Module):
         outputs = []
         for module in self.feature_extractor_modules.values():
             outputs.append(module(x))
-        res = torch.cat(outputs, dim=1)
+        res = torch.cat(outputs, dim=1).squeeze() # B,C
         return self.norm(res)
 
 class Classifier(nn.Module):
@@ -113,10 +135,10 @@ class Transparent_Signal_Processing_Network(nn.Module):
             x = layer(x)
         x = self.feature_extractor_layers(x)
         x = self.clf(x)
-        
         return x
+    
 if __name__ == '__main__':
-    from config import args
+    from config import args # for debug model
     from config import signal_processing_modules,feature_extractor_modules
     import torchinfo
     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)

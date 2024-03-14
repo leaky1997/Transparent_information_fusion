@@ -12,7 +12,7 @@ args:
   k_shot: 64
 
 # model
-  model: 'Resnet' # 'Resnet' 'WKN_m' 'Sinc_net_m' 'Huan_net' 'TFN_Morlet' 'MCN_GFK'
+  model: 'Huan_net' # 'Resnet' 'WKN_m' 'Sinc_net_m' 'Huan_net' 'TFN_Morlet' 'MCN_GFK'
   skip_connection: true
   num_classes: 5 # 5 for THU_018_basic 4 for THU_006_basic
   in_dim : 4096

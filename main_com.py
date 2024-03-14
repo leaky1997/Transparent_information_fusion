@@ -24,7 +24,7 @@ from model_collection.MWA_CNN import A_cSE,Huan_net
 from model_collection.TFN.Models.TFN import TFN_Morlet
 from model_collection.MCN.models import MCN_GFK, MultiChannel_MCN_GFK
 from model_collection.MCN.models import MCN_WFK,MultiChannel_MCN_WFK
-
+import pandas as pd
 # 创建解析器
 parser = argparse.ArgumentParser(description='comparison model')
 # 添加参数
@@ -54,4 +54,8 @@ model = Basic_trainer(model_plain, args)
 trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 # train
 trainer.fit(model,train_dataloader, test_dataloader)
-trainer.test(model,test_dataloader)
+result = trainer.test(model,test_dataloader)
+
+# 保存结果
+result_df = pd.DataFrame(result)
+result_df.to_csv(os.path.join(path, 'test_result.csv'), index=False)

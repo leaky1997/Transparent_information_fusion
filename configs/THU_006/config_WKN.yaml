@@ -1,20 +1,10 @@
-signal_processing_configs:
-  layer1: ['HT','WF','I']
-  layer2: ['HT','WF','I']
-  layer3: ['HT','WF','I']
-  layer4: ['HT','WF','I']
 
-  
 
-feature_extractor_configs: ['Mean', 'Std', 'Var', 'Entropy','Max', 'Min', 'AbsMean', 'Kurtosis', 'RMS', 'CrestFactor','Skewness', 'ClearanceFactor', 'ShapeFactor']
-# logical_configs:
-  # channel_1:
-  #   features: ['$Mean$', '$Std$']
-  # channel_2:
-  #   features: ['$Mean$', '$Std$']
 args:
 
   device: cuda
+###################### data ##################
+
   # data_dir: 
   data_dir: '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' # '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' '/home/user/data/a_bearing/a_018_THU24_pro/'
   dataset_task: THU_006_basic # THU_006_basic THU_006_generalization THU_006_fusion THU_018_basic THU_018_generalization THU_018_fusion
@@ -22,15 +12,14 @@ args:
   k_shot: 64
 
 # model
-
-  model: TSPN
+  model: 'WKN_m' # 'Resnet' 'WKN_m' 'Sinc_net_m' 'Huan_net' 'TFN_Morlet' 'MCN_GFK'
   skip_connection: true
-  num_classes: 5 # 5 for THU_018_basic 4 for THU_006_basic
+  num_classes: 4 # 5 for THU_018_basic 4 for THU_006_basic
   in_dim : 4096
   out_dim : 4096
   in_channels : 2
   out_channels : 3
-  scale : 16
+  scale : 32
 
   f_c_mu: 0
   f_c_sigma: 0.1
@@ -40,7 +29,7 @@ args:
 # hyperparameter
   learning_rate: 0.001
   batch_size: 64
-  num_epochs: 5
+  num_epochs: 100
   weight_decay: 0.0001
   num_workers: 32
   seed: 17
@@ -48,7 +37,7 @@ args:
 # train
   monitor: 'val_loss'
   patience: 8
-  gpus: 1
+  gpus: 8
   weight_decay: 0.0001
   l1_norm: 0.01
 
