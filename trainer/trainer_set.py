@@ -32,9 +32,13 @@ def trainer_set(args,path):
             return args.pruning[2]
         
     if isinstance(args.pruning, (int, float)):
-        prune_callback = ModelPruning("l1_unstructured",parameter_names = ['weight'], amount=args.pruning)
+        prune_callback = ModelPruning("l1_unstructured",
+                                      parameter_names = ['weight'],
+                                      amount=args.pruning)
     elif isinstance(args.pruning, list):
-        prune_callback = ModelPruning("l1_unstructured", amount = compute_amount)
+        prune_callback = ModelPruning("l1_unstructured",
+                                      parameter_names = ['weight'],
+                                      amount = compute_amount)
     else:
         prune_callback = None
     

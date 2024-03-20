@@ -21,10 +21,10 @@ class Basic_trainer(pl.LightningModule):
         self.acc_train = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classes)
         self.acc_test = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classes)
         
-        # self.save_hyperparameters()
+        self.save_hyperparameters(ignore = ['network'])
+    
+        # print('### network:\n',self.network)
         
-        
-        print('### network:\n',self.network)
     def forward(self, x):
         
         return self.network(x)

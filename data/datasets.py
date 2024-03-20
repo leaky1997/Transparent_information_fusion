@@ -130,7 +130,7 @@ class THU_006_generalization(Dataset):
 class THU_006or018_few_shot(Dataset):
     def __init__(self, args,flag='train', transform=AddNoiseTransform): # 1hz, 10hz, 15hz,IF
         # Load data and labels 
-        self.transform = transform(args.snr)
+        self.transform = None # transform(args.snr)
         
         self.data = np.load(args.data_dir + args.target + '_data.npy').astype(np.float32)
         self.labels = np.load(args.data_dir + args.target + '_label.npy').astype(np.float32)
