@@ -53,7 +53,7 @@ model_structure = print(model_plain)
 model = Basic_trainer(model_plain, args)
 trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 # train
-trainer.fit(model,train_dataloader, test_dataloader)
+trainer.fit(model,train_dataloader, val_dataloader)
 result = trainer.test(model,test_dataloader)
 
 # 保存结果
