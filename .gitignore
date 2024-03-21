@@ -28,3 +28,5 @@ __pycache__/
 __pycache__/
 MCN-main-main/
 TFN-main/
+*.pdf
+*.png
