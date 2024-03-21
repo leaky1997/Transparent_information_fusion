@@ -8,7 +8,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torchmetrics
-from .utils import l1_reg
+from .utils import l1_reg,get_all_layers
 
 
 class Basic_trainer(pl.LightningModule):
@@ -81,6 +81,25 @@ class Basic_trainer(pl.LightningModule):
             },
         }
         return out
+    def config_different_lr(self):
+        '''config different learning rate for different layers'''
+        
+        if not hasattr(self.args, 'learnable_parameter_learning_rate'):
+            setattr(self.args, 'learnable_parameter_learning_rate', self.args.learning_rate)  # fix bug
+            
+        layers = get_all_layers(self.network, layers = [])
+        # for i, module in enumerate(self.network.children()):
+        #     # if not isinstance(module, nn.Sequential):
+        #         layers += [l for l in module.children()] if isinstance(module, nn.ModuleList) else [module]         
+        parameters_conv = ()
+        for layer in layers:
+            if isinstance(layer, nn.Linear):                
+                parameters_conv = *parameters_conv,(layer,"weight") 
+
+        optimizer = Adam(
+            [{'params': self.network.parameters()},
+            {'params': parameters_conv, 'lr': self.args.learning_rate, 'weight_decay': self.args.weight_decay}],
+            lr=self.args.learnable_parameter_learning_rate, weight_decay=self.args.weight_decay)
 
 
 

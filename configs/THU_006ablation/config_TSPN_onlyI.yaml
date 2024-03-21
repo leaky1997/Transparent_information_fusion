@@ -1,8 +1,8 @@
 signal_processing_configs:
-  layer1: ['HT','WF','I']
-  layer2: ['HT','WF','I']
-  layer3: ['HT','WF','I']
-  layer4: ['HT','WF','I'] 
+  layer1: ['I','I','I']
+  layer2: ['I','I','I']
+  layer3: ['I','I','I']
+  layer4: ['I','I','I'] 
 
 feature_extractor_configs: ['Mean', 'Std', 'Var', 'Entropy','Max', 'Min', 'AbsMean', 'Kurtosis', 'RMS', 'CrestFactor','Skewness', 'ClearanceFactor', 'ShapeFactor']
 
@@ -18,7 +18,7 @@ args:
 # model
   model: TSPN
   skip_connection: true
-  num_classes: 4
+  num_classes: 5
   in_dim : 4096
   out_dim : 4096
   in_channels : 2
@@ -44,6 +44,6 @@ args:
   gpus: 8
   weight_decay: 0.0001
   l1_norm: 0.01
-  log_parameters: True
-  pruning:  [0.8,0.5,0.05]
+
+  pruning: None # [0.7,0.5,0.01]
   snr: 1

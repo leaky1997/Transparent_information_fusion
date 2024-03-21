@@ -77,7 +77,7 @@ class HilbertTransform(SignalProcessingBase):
             Xf[..., (N + 1) // 2:] = 0
         return torch.fft.ifft(Xf, dim=1).abs()
     
-###############################################  WaveFilters module############################################## 
+###############################################  WaveFilters module  ############################################## 
 class WaveFilters(SignalProcessingBase):
     def __init__(self, args):
         super(WaveFilters, self).__init__(args)

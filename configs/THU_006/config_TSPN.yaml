@@ -17,7 +17,7 @@ args:
 
 # model
   model: TSPN
-  skip_connection: true
+  skip_connection: True
   num_classes: 4
   in_dim : 4096
   out_dim : 4096
@@ -44,6 +44,8 @@ args:
   gpus: 8
   weight_decay: 0.0001
   l1_norm: 0.01
+
+  log_parameters: True
 
   pruning: None # [0.7,0.5,0.01]
   snr: 1
