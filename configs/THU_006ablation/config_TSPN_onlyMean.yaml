@@ -4,10 +4,9 @@ signal_processing_configs:
   layer3: ['HT','WF','I']
   layer4: ['HT','WF','I'] 
 
-feature_extractor_configs: ['Mean', 'Std', 'Var', 'Entropy','Max', 'Min', 'AbsMean', 'Kurtosis', 'RMS', 'CrestFactor','Skewness', 'ClearanceFactor', 'ShapeFactor']
+feature_extractor_configs: ['Mean', 'Std']
 
 args:
-
   device: cuda
   data_dir: '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' # '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' '/home/user/data/a_bearing/a_018_THU24_pro/'
   dataset_task: THU_006_basic # THU_006_basic THU_006_generalization THU_006_fusion THU_018_basic THU_018_generalization THU_018_fusion
@@ -18,7 +17,7 @@ args:
 # model
   model: TSPN
   skip_connection: true
-  num_classes: 4
+  num_classes: 5
   in_dim : 4096
   out_dim : 4096
   in_channels : 2
@@ -44,6 +43,6 @@ args:
   gpus: 8
   weight_decay: 0.0001
   l1_norm: 0.01
-  log_parameters: True
-  pruning:  [0.8,0.5,0.05]
+
+  pruning: None # [0.7,0.5,0.01]
   snr: 1

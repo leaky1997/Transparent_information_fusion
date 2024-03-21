@@ -3,6 +3,7 @@ from scipy import optimize
 import torch 
 import torch.nn as nn
 from einops import rearrange
+import torch.nn.functional as F
 
 class CustomBatchNorm(nn.Module):
     def __init__(self, num_features, eps=0.1):
@@ -30,6 +31,8 @@ class SignalProcessingLayer(nn.Module):
         self.weight_connection = nn.Linear(input_channels, output_channels)
         self.signal_processing_modules = signal_processing_modules
         self.module_num = len(signal_processing_modules)
+        self.temperature = 0.1
+        
         if skip_connection:
             self.skip_connection = nn.Linear(input_channels, output_channels)
     def forward(self, x):
@@ -38,6 +41,9 @@ class SignalProcessingLayer(nn.Module):
         normed_x = self.norm(x)
         normed_x = rearrange(normed_x, 'b c l -> b l c')
         # 通过线性层
+        
+        self.weight_connection.weight.data = F.softmax((1.0 / self.temperature) *
+                                                       self.weight_connection.weight.data, dim=0)
         x = self.weight_connection(normed_x)
 
         # 按模块数拆分
@@ -62,6 +68,8 @@ class FeatureExtractorlayer(nn.Module):
         out_channels = int(len(feature_extractor_modules) * out_channels)
         
         self.norm = CustomBatchNorm(out_channels)
+        
+        # self.temperature = 1
     # def norm(self,x): # feature normalization
     #     mean = x.mean(dim = 0,keepdim = True)
     #     std = x.std(dim = 0,keepdim = True)
@@ -69,6 +77,8 @@ class FeatureExtractorlayer(nn.Module):
     #     return out
            
     def forward(self, x):
+        # TODO # self.weight_connection.weight.data = F.softmax((1.0 / self.temperature) *
+        #                                                self.weight_connection.weight.data, dim=0)
         x = self.weight_connection(x)
         x = rearrange(x, 'b l c -> b c l')
         outputs = []

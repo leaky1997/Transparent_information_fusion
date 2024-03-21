@@ -32,7 +32,7 @@ model_structure = print(model.network)
 trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 
 # train
-trainer.fit(model,train_dataloader, val_dataloader)
+trainer.fit(model,train_dataloader, val_dataloader) # TODO load best checkpoint
 result = trainer.test(model,test_dataloader)
 
 # 保存结果
