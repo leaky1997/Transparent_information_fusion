@@ -25,14 +25,14 @@ def get_data(args):
     val_loader = DataLoader(
         dataset = dataset,
         batch_size= args.batch_size,
-        shuffle = True,
+        shuffle = False,
         num_workers = args.num_workers
     )
     dataset = dataset_class(args,flag = 'test')
     test_loader = DataLoader(
         dataset = dataset,
         batch_size= args.batch_size,
-        shuffle = True,
+        shuffle = False,
         num_workers = args.num_workers
     )     
     return train_loader,val_loader,test_loader

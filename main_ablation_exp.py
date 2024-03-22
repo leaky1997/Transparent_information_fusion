@@ -5,7 +5,6 @@ import argparse
 from model.TSPN import Transparent_Signal_Processing_Network
 from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
-from trainer.utils import load_best_model_checkpoint
 
 import torch
 from pytorch_lightning import seed_everything
@@ -30,34 +29,14 @@ network = Transparent_Signal_Processing_Network(signal_processing_modules, featu
 #model trainer #
 model = Basic_plmodel(network, args)
 model_structure = print(model.network)
+trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 
-import pandas as pd
+# train
+trainer.fit(model,train_dataloader, val_dataloader) # TODO load best checkpoint
+result = trainer.test(model,test_dataloader)
 
-# 在循环外部创建一个空的DataFrame
-results_list = []
-
-for shot in [5,10,15,20,25]:  # Simplified loop: 1 to 10
-    network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args)
-    model = Basic_plmodel(network, args)
-    model_structure = print(model.network)
-    
-    args.k_shot = shot  # Set the k_shot parameter
-    # Set up the trainer and data loaders (ensure trainer_set is defined correctly)
-    trainer, train_dataloader, val_dataloader, test_dataloader = trainer_set(args, path)
-
-    # Train the model
-    trainer.fit(model, train_dataloader, val_dataloader)
-    model = load_best_model_checkpoint(model,trainer)
-    # Test the model and collect results
-    result = trainer.test(model, test_dataloader)
-
-    # Collect each result
-    results_list.append(result)
-
-# Convert the list of results to a DataFrame
-result_df = pd.DataFrame.from_records(results_list)
-
-# Save the DataFrame to a CSV file
+# 保存结果
+result_df = pd.DataFrame(result)
 result_df.to_csv(os.path.join(path, 'test_result.csv'), index=False)
 
 

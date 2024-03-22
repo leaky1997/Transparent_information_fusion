@@ -8,9 +8,9 @@ feature_extractor_configs: ['Mean', 'Std']
 
 args:
   device: cuda
-  data_dir: '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' # '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' '/home/user/data/a_bearing/a_018_THU24_pro/'
-  dataset_task: THU_006_basic # THU_006_basic THU_006_generalization THU_006_fusion THU_018_basic THU_018_generalization THU_018_fusion
-  target: '10hz' # if basic or generalization 1hz 10hz 15hz
+  data_dir: '/home/user/data/a_bearing/a_018_THU24_pro/' # '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' '/home/user/data/a_bearing/a_018_THU24_pro/'
+  dataset_task: THU_018_basic # THU_006_basic THU_006_generalization THU_006_fusion THU_018_basic THU_018_generalization THU_018_fusion
+  target: 'IF' # if basic or generalization 1hz 10hz 15hz
   k_shot: 64
 
 
@@ -30,6 +30,7 @@ args:
   f_b_sigma: 0.1
 
 # hyperparameter
+  learnable_parameter_learning_rate: 0.001
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 100
@@ -43,6 +44,6 @@ args:
   gpus: 8
   weight_decay: 0.0001
   l1_norm: 0.01
-
+  log_parameters: True
   pruning: None # [0.7,0.5,0.01]
   snr: 1

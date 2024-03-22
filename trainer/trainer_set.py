@@ -1,5 +1,4 @@
 from pytorch_lightning.loggers import CSVLogger
-
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import ModelPruning
 from .utils import ModelParametersLoggingCallback
@@ -34,7 +33,7 @@ def call_backs(args,path):
     checkpoint_callback = ModelCheckpoint(
         monitor='val_loss',
         filename='model-{epoch:02d}-{val_loss:.4f}',
-        save_top_k=3,
+        save_top_k=8,
         mode='min',
         dirpath = path
     )

@@ -3,11 +3,13 @@
 ############# config##########
 import argparse
 from model.TSPN import Transparent_Signal_Processing_Network
-from trainer.trainer_basic import Basic_trainer
+from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
+from trainer.utils import load_best_model_checkpoint
 
 import torch
 from pytorch_lightning import seed_everything
+
 from configs.config import parse_arguments,config_network
 import os
 import pandas as pd
@@ -27,12 +29,15 @@ signal_processing_modules, feature_extractor_modules = config_network(configs,ar
 network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args)
 
 #model trainer #
-model = Basic_trainer(network, args)
+model = Basic_plmodel(network, args)
 model_structure = print(model.network)
 trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 
 # train
 trainer.fit(model,train_dataloader, val_dataloader) # TODO load best checkpoint
+
+model = load_best_model_checkpoint(model,trainer)
+
 result = trainer.test(model,test_dataloader)
 
 # 保存结果
