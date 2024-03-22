@@ -30,3 +30,6 @@ MCN-main-main/
 TFN-main/
 *.pdf
 *.png
+main_ablation_exp.py
+main_com_kshotexp.py
+main_kshotexp.py

@@ -5,6 +5,7 @@ import argparse
 from model.TSPN import Transparent_Signal_Processing_Network
 from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
+from trainer.utils import load_best_model_checkpoint
 
 import torch
 from pytorch_lightning import seed_everything
@@ -27,17 +28,34 @@ signal_processing_modules, feature_extractor_modules = config_network(configs,ar
 network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args)
 
 #model trainer #
-model = Basic_plmodel(network, args)
-model_structure = print(model.network)
-trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
+all_results_df = pd.DataFrame()
+for lr_weight in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
+    for lr_parameter in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
+        print(f'lr_weight: {lr_weight}, lr_parameter: {lr_parameter}')
+        args.learning_rate = lr_weight
+        args.learnable_parameter_learning_rate = lr_parameter
+        model = Basic_plmodel(network, args)
+        trainer, train_dataloader, val_dataloader, test_dataloader = trainer_set(args, path)
 
-# train
-trainer.fit(model,train_dataloader, val_dataloader) # TODO load best checkpoint
-result = trainer.test(model,test_dataloader)
+        # 训练
+        trainer.fit(model, train_dataloader, val_dataloader)  # TODO: 加载最佳检查点
+        model = load_best_model_checkpoint(model,trainer)
+        # 测试
+        result = trainer.test(model, test_dataloader)
 
-# 保存结果
-result_df = pd.DataFrame(result)
-result_df.to_csv(os.path.join(path, 'test_result.csv'), index=False)
+        # 将测试结果、学习率和参数学习率添加到字典中
+        result_dict = {'learning_rate_weight': lr_weight, 'learnable_parameter_learning_rate': lr_parameter, **result[0]}
+
+        # 将本次迭代的结果添加到DataFrame中
+        if all_results_df.empty:
+            all_results_df = pd.DataFrame([result_dict])
+        else:
+            new_row = pd.DataFrame([result_dict])
+            all_results_df = pd.concat([all_results_df, new_row], ignore_index=True)
+
+# 保存整个DataFrame到CSV文件
+results_file_path = os.path.join(path, 'test_results.csv')
+all_results_df.to_csv(results_file_path, index=False)
 
 
 

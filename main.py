@@ -9,7 +9,6 @@ from trainer.utils import load_best_model_checkpoint
 
 import torch
 from pytorch_lightning import seed_everything
-
 from configs.config import parse_arguments,config_network
 import os
 import pandas as pd

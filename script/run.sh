@@ -30,7 +30,7 @@ python main_com_kshotexp.py --config_dir configs/THU_018/config_MWA_CNN_shot.yam
 # python main.py --config_dir configs/config_basic.yaml --debug
 
 # prune
-python main.py --config_dir configs/THU_006/config_TSPN_prune.yaml
+CUDA_VISIBLE_DEVICES=0  python main.py --config_dir configs/THU_006/config_TSPN_prune.yaml
 python main.py --config_dir configs/THU_018/config_TSPN_prune.yaml
 
 # ablation study
