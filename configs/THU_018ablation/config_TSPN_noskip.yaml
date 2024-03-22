@@ -16,9 +16,9 @@ args:
 
 
 # model
-  model: TSPN
+  model: TSPN_ablation
   skip_connection: False
-  num_classes: 4
+  num_classes: 5
   in_dim : 4096
   out_dim : 4096
   in_channels : 2
