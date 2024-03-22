@@ -7,8 +7,9 @@ from sklearn.calibration import log
 import torch
 ############# config##########
 import argparse
-from trainer.trainer_basic import Basic_trainer
+from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
+from trainer.utils import load_best_model_checkpoint
 # from configs.config import args
 # from configs.config import signal_processing_modules,feature_extractor_modules
 from configs.config import parse_arguments,config_network
@@ -50,7 +51,7 @@ model_plain = MODEL_DICT[args.model](args)
 # model_structure = print(model_plain)
 ############## model train ########## 
 
-model = Basic_trainer(model_plain, args)
+model = Basic_plmodel(model_plain, args)
 import pandas as pd
 
 # 在循环外部创建一个空的DataFrame
@@ -58,13 +59,16 @@ results_list = []
 
 for shot in [5,10,15,20,25]:  # Simplified loop: 1 to 10
     model_plain = MODEL_DICT[args.model](args)
-    model = Basic_trainer(model_plain, args)
+    model = Basic_plmodel(model_plain, args)
     args.k_shot = shot  # Set the k_shot parameter
     # Set up the trainer and data loaders (ensure trainer_set is defined correctly)
     trainer, train_dataloader, val_dataloader, test_dataloader = trainer_set(args, path)
 
     # Train the model
     trainer.fit(model, train_dataloader, val_dataloader)
+    
+    model = load_best_model_checkpoint(model,trainer)
+    
     # Test the model and collect results
     result = trainer.test(model, test_dataloader)
 
