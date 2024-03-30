@@ -14,9 +14,10 @@
 # echo "All experiments completed."
 
 # python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN.yaml
-
+CUDA_VISIBLE_DEVICES=0 CUDA_VISIBLE_DEVICES=2
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_noskip.yaml
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_onlyI.yaml
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_onlyMean.yaml
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_woHT.yaml
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_woWF.yaml
+

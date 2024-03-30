@@ -39,7 +39,7 @@ class ModelParametersLoggingCallback(Callback):
                     
         # 如果params_history是空的，直接从epoch_params创建一个新的DataFrame
         if self.params_history.empty:
-            self.params_history = pd.DataFrame.from_dict(epoch_params if epoch_params else {-1:-1})
+            self.params_history = pd.DataFrame.from_dict(epoch_params)
         else:
             # 否则，将新的一行添加到params_history中
             new_row = pd.DataFrame.from_dict(epoch_params)

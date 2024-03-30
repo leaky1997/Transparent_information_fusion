@@ -67,7 +67,7 @@ def parse_arguments(parser):
     
     # dataset = args.data_dir[-3:].replace('/','')
     time_stamp = time.strftime("%Y-%m-%d-%H-%M", time.localtime())
-    name = f'time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_l1norm{args.l1_norm}_dataset{args.dataset_task}_seed{args.seed}'
+    name = f'time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_l1norm{args.l1_norm}_dataset{args.dataset_task}'
 
     print(f'Running experiment: {name}')
     
@@ -102,7 +102,10 @@ def config_network(config,args):
     for layer in config['signal_processing_configs'].values():
         signal_module = OrderedDict()
         for module_name in layer:
+            
             module_class = ALL_SP[module_name]
+            
+            module_name = get_unique_module_name(signal_module.keys(), module_name)
             signal_module[module_name] = module_class(args)  # 假设所有模块的构造函数不需要参数
         signal_processing_modules.append(SignalProcessingModuleDict(signal_module))
 
@@ -114,6 +117,26 @@ def config_network(config,args):
     # TODO logic
     
     return signal_processing_modules,feature_extractor_modules
+
+def get_unique_module_name(existing_names, module_name):
+    """
+    根据已存在的模块名列表，为新模块生成一个唯一的名称。
+    
+    :param existing_names: 已存在的模块名称的集合或列表。
+    :param module_name: 要检查的模块名称。
+    :return: 唯一的模块名称。
+    """
+    if module_name not in existing_names:
+        # 如果模块名不存在，则直接返回
+        return module_name
+    else:
+        # 如果模块名已存在，尝试添加序号直到找到一个唯一的名字
+        index = 1
+        unique_name = f"{module_name}_{index}"
+        while unique_name in existing_names:
+            index += 1
+            unique_name = f"{module_name}_{index}"
+        return unique_name
 # logic
 
 # import torch
