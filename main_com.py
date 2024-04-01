@@ -7,8 +7,9 @@ from sklearn.calibration import log
 import torch
 ############# config##########
 import argparse
-from trainer.trainer_basic import Basic_trainer
+from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
+from trainer.utils import load_best_model_checkpoint
 # from configs.config import args
 # from configs.config import signal_processing_modules,feature_extractor_modules
 from configs.config import parse_arguments,config_network
@@ -50,10 +51,11 @@ model_plain = MODEL_DICT[args.model](args)
 model_structure = print(model_plain)
 ############## model train ########## 
 
-model = Basic_trainer(model_plain, args)
+model = Basic_plmodel(model_plain, args)
 trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 # train
 trainer.fit(model,train_dataloader, val_dataloader)
+model = load_best_model_checkpoint(model,trainer)
 result = trainer.test(model,test_dataloader)
 
 # 保存结果

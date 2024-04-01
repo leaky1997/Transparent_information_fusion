@@ -39,16 +39,25 @@ class Basic_plmodel(pl.LightningModule):
         self.log('train_loss', loss, on_epoch=True, prog_bar=True, logger=True,sync_dist=True)  # sync_dist = False lead to BUG
         self.log('train_acc', acc,  on_epoch=True, prog_bar=True, logger=True,sync_dist=True)
         
-        regularization_loss = 0
+        
         if self.args.l1_norm > 0: # l1 regularization
-            for param in self.network.parameters():  # TODO 值norm linear的权重
-                regularization_loss += l1_reg(param = param) 
-            
+            # for param in self.network.parameters():  # TODO 只norm linear的权重
+            #     regularization_loss += l1_reg(param = param) 
+                
+            regularization_loss = self.update_regularization_loss()      
+                          
             loss += self.args.l1_norm * regularization_loss          
             self.log('l1_loss_', regularization_loss,prog_bar =True,sync_dist=True)    
         
         
         return loss
+
+    def update_regularization_loss(self):
+        regularization_loss = 0
+        for i, (name,param) in enumerate(self.network.named_parameters()):
+            if 'WF' not in name:
+                regularization_loss += l1_reg(param = param)
+        return regularization_loss
     
     def validation_step(self, batch, batch_idx):
         # self.eval()

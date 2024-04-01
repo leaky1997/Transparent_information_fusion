@@ -1,6 +1,8 @@
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import ModelPruning
+from pytorch_lightning.callbacks import EarlyStopping
+
 from .utils import ModelParametersLoggingCallback
 
 
@@ -48,6 +50,10 @@ def call_backs(args,path):
         
     if args.log_parameters:
         callback_list.append(ModelParametersLoggingCallback(path = path, module_type = WaveFilters))
+        
+    early_stopping = create_early_stopping_callback(args)
+    callback_list.append(early_stopping)
+    
     return callback_list
 
 
@@ -72,3 +78,27 @@ def Prune_callback(args):
     else:
         prune_callback = None
     return prune_callback
+
+def create_early_stopping_callback(args):
+    """
+    根据args参数创建EarlyStopping回调实例。
+    
+    参数:
+    - args: 包含配置的对象，比如Namespace对象。
+    
+    返回:
+    - 一个配置好的EarlyStopping实例。
+    
+    """
+        # 使用args中指定的patience值
+    early_stopping = EarlyStopping(
+        monitor='val_loss',
+        min_delta=0.00,
+        patience=args.patience,  # 从args中读取patience值
+        verbose=True,
+        mode='min',
+        check_finite=True,  # 当监控指标为无穷大或NaN时停止
+        check_on_train_epoch_end=False  # 仅在验证阶段检查
+    )
+    
+    return early_stopping

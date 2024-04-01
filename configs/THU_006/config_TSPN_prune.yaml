@@ -41,7 +41,7 @@ args:
 # train
   monitor: 'val_loss'
   patience: 8
-  gpus: 8
+  gpus: 1
   weight_decay: 0.0001
   l1_norm: 0.01
   log_parameters: True

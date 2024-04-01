@@ -22,8 +22,8 @@ class ModelParametersLoggingCallback(Callback):
 
     def on_train_epoch_end(self, trainer, pl_module):
         epoch_params = {}
-        layers = get_all_layers(pl_module.network)
-        for layer in layers:
+        layers = get_all_layers(pl_module.network,[])
+        for num, layer in enumerate(layers):
             if isinstance(layer, self.module_type):
                 for name, params in layer.named_parameters():
                     param_values = params.clone().detach().cpu().numpy()
@@ -31,18 +31,19 @@ class ModelParametersLoggingCallback(Callback):
                         # 展开参数数组到不同的key下，这里假设param_values是二维的，适用于大多数情况
                         for i, value in enumerate(param_values.flatten()):
                             # 为每个子参数创建独特的key
-                            key_name = f'{layer}_{name}_{i}'
+                            key_name = f'{num}_{layer}_{name}_{i}'
                             epoch_params[key_name] = value
                     else:
-                        # 非列表参数，直接保存
-                        epoch_params[f'{layer}_{name}'] = param_values.flatten()
+                        key_name = f'{num}_{layer}_{name}'
+                        epoch_params[key_name] = param_values.item()  # 使用.item()提取标量值，并将其包装在列表中
                     
         # 如果params_history是空的，直接从epoch_params创建一个新的DataFrame
         if self.params_history.empty:
-            self.params_history = pd.DataFrame.from_dict(epoch_params)
+            # self.params_history = pd.DataFrame.from_dict(epoch_params)  # ValueError: If using all scalar values, you must pass an index
+            self.params_history = pd.DataFrame([epoch_params], index=[0])
         else:
             # 否则，将新的一行添加到params_history中
-            new_row = pd.DataFrame.from_dict(epoch_params)
+            new_row = pd.DataFrame([epoch_params], index=[0])
             self.params_history = pd.concat([self.params_history, new_row], ignore_index=True)
 
     def on_train_end(self, trainer, pl_module):

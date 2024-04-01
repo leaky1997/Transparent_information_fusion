@@ -98,3 +98,7 @@ DATASET_TASK_CLASS = {
 14. CrestFactorDeltaFeature：计算输入x的峰值因子的差分值。公式为：$crest_factor_delta(x) = \frac{\sqrt{\frac{1}{N}\sum_{i=1}^{N} (x_{i+1} - x_i)^2}}{abs_mean(x)}$。
 
 # Logic_inference
+
+# note
+
+没有用wandb记录 以及sweep 以及自动调参
