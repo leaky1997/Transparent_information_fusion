@@ -34,3 +34,4 @@ main_ablation_exp.py
 main_com_kshotexp.py
 main_kshotexp.py
 plot.zip
+*.csv

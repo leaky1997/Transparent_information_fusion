@@ -51,9 +51,10 @@ def load_models(config_dir,best_model_path=None):
     # 如果有最佳检查点，加载最佳检查点
     # best_model_path = args.best_model_path  # 假设args中包含最佳模型路径
     if best_model_path:
+        print(f'Loading best model from {best_model_path}')
         state_dict = torch.load(best_model_path)
         model.load_state_dict(state_dict['state_dict'])
-    return model, test_dataloader
+    return model, test_dataloader, args
     # 获取测试数据和标签
     
 def predict_from_loader(model, test_dataloader):
@@ -67,7 +68,7 @@ def predict_from_loader(model, test_dataloader):
     with torch.no_grad():
         y_pred = model.network(data)
     
-    return y_true, y_pred
+    return y_true, y_pred.cuda()
     # test_dataset = test_dataloader.dataset.selected_data
     # y_true = test_dataloader.dataset.selected_labels
     # y_true = torch.tensor(y_true).cuda()
@@ -79,7 +80,8 @@ def predict_from_loader(model, test_dataloader):
     #     y_pred = model.network(data)
     
     # return model, data, y_true, y_pred
-
-# 使用示例
-config_dir = 'configs/THU_006/config_TSPN.yaml'
-model, test_data, test_labels, predictions = load_and_predict(config_dir,best_model_path='save/THU1+THU2剪枝/THU1_new/model-epoch=61-val_loss=0.0545.ckpt')
+if __name__ == '__main__':
+    pass
+    # 使用示例
+    # config_dir = 'configs/THU_006/config_TSPN.yaml'
+    # model, test_data, test_labels, predictions = load_and_predict(config_dir,best_model_path='save/THU1+THU2剪枝/THU1_new/model-epoch=61-val_loss=0.0545.ckpt')
