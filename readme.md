@@ -102,3 +102,12 @@ DATASET_TASK_CLASS = {
 # note
 
 没有用wandb记录 以及sweep 以及自动调参
+
+
+git filter-branch --force --index-filter \
+  "git rm --cached --post_analysis.ipynb" \
+  --prune-empty --tag-name-filter cat -- --all
+  
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch 'post_analysis.ipynb'" \
+  --prune-empty --tag-name-filter cat -- --all
