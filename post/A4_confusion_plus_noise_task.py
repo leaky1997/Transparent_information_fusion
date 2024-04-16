@@ -35,6 +35,7 @@ def heatmap_confusion(predictions, test_labels, args,
     plt.xlabel('Predicted label')
     plt.tight_layout()
     plt.savefig(os.path.join(plot_dir, f'{name}_confusion_matrix{save_type}'), transparent=True, dpi=512)
+    plt.savefig(os.path.join(plot_dir, f'{name}_confusion_matrix.svg'), transparent=True, dpi=512)
     plt.show()
     plt.close()
     
@@ -81,6 +82,8 @@ def plot_accuracy_vs_snr(test_data, test_labels, model_dict, snr_levels, plot_di
     plt.legend('best')
     plt.grid(True)
     plt.savefig(os.path.join(plot_dir, file_name) + '.pdf', dpi=512)
+    plt.savefig(os.path.join(plot_dir, file_name) + '.svg', dpi=512)
+    plt.savefig(os.path.join(plot_dir, file_name) + '.png', dpi=512)
     plt.show()
     plt.close()
 

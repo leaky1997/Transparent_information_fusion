@@ -25,6 +25,7 @@ class CustomBatchNorm(nn.Module):
         return out
 
 class SignalProcessingLayer(nn.Module):
+    # TODO op first then weight connection -> attention
     def __init__(self, signal_processing_modules, input_channels, output_channels,skip_connection=True):
         super(SignalProcessingLayer, self).__init__()
         self.norm = nn.InstanceNorm1d(input_channels)
@@ -56,6 +57,8 @@ class SignalProcessingLayer(nn.Module):
         x = torch.cat(outputs, dim=2)
         # 添加skip connection
         if hasattr(self, 'skip_connection'):
+            # self.skip_connection.weight.data = F.softmax((1.0 / self.temperature) *
+            #                                             self.skip_connection.weight.data, dim=0)
             x = x + self.skip_connection(normed_x)
         return x
     
@@ -96,6 +99,8 @@ class Classifier(nn.Module):
             nn.Linear(128, num_classes)
             
         )
+        # self.clf = nn.Linear(in_channels, num_classes)
+        
     def forward(self, x):
         x = x.view(x.size(0), -1)
         return self.clf(x)
@@ -144,6 +149,7 @@ class Transparent_Signal_Processing_Network(nn.Module):
         for layer in self.signal_processing_layers:
             x = layer(x)
         x = self.feature_extractor_layers(x)
+        
         x = self.clf(x)
         return x
     
@@ -158,42 +164,45 @@ if __name__ == '__main__':
     
     net_summaary= torchinfo.summary(net.cuda(),(2,4096,2),device = "cuda")
     print(net_summaary)
-    with open(f'save/TSPN.txt','w') as f:
+    with open(f'save/TSPN2.txt','w') as f:
         f.write(str(net_summaary))      
         
-    args = {
-        'in_channels': 2,
-        'out_channels': 6,  # 这应该与您网络设计中的输出通道数一致
-        'scale': 1,  # 根据您的模型具体需要调整
-        'num_classes': 5,  # 假设有5个类别
-        'learning_rate': 0.001,
-        'num_epochs': 100
-    }
-    import torch
-    import torch.nn as nn
-    import torch.optim as optim
-    optimizer = optim.Adam(net.parameters(), lr=args['learning_rate'])
-    loss_fn = nn.CrossEntropyLoss()
+    # args = {
+    #     'in_channels': 2,
+    #     'out_channels': 6,  # 这应该与您网络设计中的输出通道数一致
+    #     'scale': 1,  # 根据您的模型具体需要调整
+    #     'num_classes': 5,  # 假设有5个类别
+    #     'learning_rate': 0.001,
+    #     'num_epochs': 100
+    # }
+    # import torch
+    # import torch.nn as nn
+    # import torch.optim as optim
+    # optimizer = optim.Adam(net.parameters(), lr=args['learning_rate'])
+    # loss_fn = nn.CrossEntropyLoss()
 
-    # 模拟训练数据和标签
-    def generate_random_data(batch_size, length, input_channels):
-        data = torch.randn(batch_size, length, input_channels)
-        labels = torch.randint(0, args['num_classes'], (batch_size,))
-        return data, labels
+    # # 模拟训练数据和标签
+    # def generate_random_data(batch_size, length, input_channels):
+    #     data = torch.randn(batch_size, length, input_channels)
+    #     labels = torch.randint(0, args['num_classes'], (batch_size,))
+    #     return data, labels
 
-    # 训练循环
-    for epoch in range(args['num_epochs']):
-        net.train()
-        data, labels = generate_random_data(32, 4096, args['in_channels'])  # 假设序列长度为100
-        data, labels = data.cuda(), labels.cuda()
-        optimizer.zero_grad()
-        outputs = net(data)
-        loss = loss_fn(outputs, labels)
-        loss.backward()
-        optimizer.step()
+    # # 训练循环
+    # for epoch in range(args['num_epochs']):
+    #     net.train()
+    #     data, labels = generate_random_data(32, 4096, args['in_channels'])  # 假设序列长度为100
+    #     data, labels = data.cuda(), labels.cuda()
+    #     optimizer.zero_grad()
+    #     outputs = net(data)
+    #     loss = loss_fn(outputs, labels)
+    #     loss.backward()
+    #     optimizer.step()
         
-        if epoch % 10 == 0:  # 每10轮输出一次损失
-            print(f"Epoch {epoch}, Loss: {loss.item()}")    
+    #     if epoch % 10 == 0:  # 每10轮输出一次损失
+    #         print(f"Epoch {epoch}, Loss: {loss.item()}")    
+    
+    
+    ####################################################
 # def test_backward():
 #     from config import args
 #     from config import signal_processing_modules,feature_extractor_modules

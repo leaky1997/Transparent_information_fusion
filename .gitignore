@@ -35,3 +35,14 @@ main_com_kshotexp.py
 main_kshotexp.py
 plot.zip
 *.csv
+*.ai
+*.npy
+*.svg
+./post
+
+/1_paperfig
+
+1_paperfig/figs/素材/case1feature/Resnettsne_all_models.svg
+post_analysis.ipynb
+
+post_analysis.ipynb

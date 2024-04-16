@@ -39,6 +39,7 @@ def plot_filter_response(filters, f_cs, f_bs, plot_dir='./plot_dir'):
     ax.set_ylabel('Amplitude')
     fig.legend(loc='upper center', ncol=4, facecolor='gray')
     plt.savefig(f'{plot_dir}/filter_all4.pdf', dpi=512)
+    plt.savefig(f'{plot_dir}/filter_all4.svg', dpi=512)
     plt.savefig(f'{plot_dir}/filter_all4.png', dpi=512)
     plt.show()
 
@@ -65,6 +66,7 @@ def plot_time_domain(filters, f_cs, f_bs, plot_dir='./plot_dir'):
     plt.tight_layout()
     plt.savefig(f'{plot_dir}/filter_time.pdf', dpi=512)
     plt.savefig(f'{plot_dir}/filter_time.png', dpi=512)
+    plt.savefig(f'{plot_dir}/filter_time.svg', dpi=512)
     plt.show()
 
 
@@ -139,11 +141,49 @@ def plot_filter_evolution(params_path = 'post/params.csv',
     plt.tight_layout()
     plt.savefig(f'{plot_dir}/filters_layer_scale.pdf', transparent=True, dpi=512)
     plt.savefig(f'{plot_dir}/filters_layer_scale.png', transparent=True, dpi=512)
+    plt.savefig(f'{plot_dir}/filters_layer_scale.svg', transparent=True, dpi=512)
     plt.plot()
     plt.close()
     
+from matplotlib import cm, animation
+def animate_filter_evolution(params_path='params.csv', channels=4, layers=4, plot_dir='./plot_dir', freq_length=2049):
+    print(f'Animating filter evolution from {params_path}...')
+    params = pd.read_csv(params_path)
+    
+    dict_len = len(params.columns) // 2
+    row = layers  # Assuming 'layers' represents rows
+    column = channels  # Assuming 'channels' represents columns
 
-        
+    fig, axs = plt.subplots(row, column, figsize=(10, 8))
+    omega = torch.linspace(0, 0.5, freq_length)
+    cmap = cm.get_cmap('cool')
+    
+    lenth = len(params.iloc[:, 0])
+
+    def update(epoch):
+        print(f'Animating epoch {epoch}...')
+        for layer in range(layers):
+            for channel in range(channels):
+                ax = axs[layer, channel]
+                ax.clear()
+                
+                f_c = params.iloc[epoch, channel * layers + layer * 2]
+                f_b = params.iloc[epoch, channel * layers + layer * 2 + layers]
+                filter = torch.exp(-((omega - f_c) / (2 * f_b)) ** 2)
+                
+                ax.plot(omega.numpy(), filter.numpy(), color=cmap(epoch / lenth), alpha=0.8)
+                ax.set_title(f'Layer {layer} Channel {channel}')
+                ax.grid(True, linestyle='--', linewidth=0.5, color='gray', alpha=0.5)
+
+        # Update the color bar to match the current epoch
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=lenth))
+        sm.set_array([])
+        # fig.colorbar(sm, ax=axs.ravel().tolist(), orientation='vertical')
+
+    ani = animation.FuncAnimation(fig, update, frames=lenth, repeat=False)
+    
+    plt.tight_layout()
+    ani.save(f'filter_evolution_animation.gif', writer='imagemagick', fps=10)        
     
     # for l in range(layers):
     #     for s in range(scales):

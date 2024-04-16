@@ -94,15 +94,18 @@ class Morlet_fast(nn.Module):
         time_disc_left = torch.linspace(-(self.kernel_size / 2) + 1, -1,
                                         steps=int((self.kernel_size / 2)))
 
-        p1 = time_disc_right.cuda() - self.b_.cuda() / self.a_.cuda()
-        p2 = time_disc_left.cuda() - self.b_.cuda() / self.a_.cuda()
+        p1 = time_disc_right - self.b_ / self.a_
+        p2 = time_disc_left - self.b_ / self.a_
+        
+        p1 = p1.to(waveforms.device)
+        p2 = p2.to(waveforms.device)
 
         Morlet_right = Morlet(p1)
         Morlet_left = Morlet(p2)
 
         Morlet_filter = torch.cat([Morlet_left, Morlet_right], dim=1)  # 40x1x250
 
-        self.filters = (Morlet_filter).view(self.num_classs, 1, self.kernel_size).cuda()
+        self.filters = (Morlet_filter).view(self.num_classs, 1, self.kernel_size).to(waveforms.device)
 
         return F.conv1d(waveforms, self.filters, stride=1, padding=1, dilation=1, bias=None, groups=1)
 
@@ -168,15 +171,15 @@ class Morlet_multiple_channel(nn.Module):
         time_disc_left = torch.linspace(-(self.kernel_size / 2) + 1, -1,
                                         steps=int((self.kernel_size / 2)))
 
-        p1 = time_disc_right.cuda() - self.b_.cuda() / self.a_.cuda()
-        p2 = time_disc_left.cuda() - self.b_.cuda() / self.a_.cuda()
+        p1 = time_disc_right - self.b_ / self.a_
+        p2 = time_disc_left - self.b_ / self.a_
 
-        Morlet_right = Morlet(p1)
-        Morlet_left = Morlet(p2)
+        Morlet_right = Morlet(p1).to(waveforms.device)
+        Morlet_left = Morlet(p2).to(waveforms.device)
 
         Morlet_filter = torch.cat([Morlet_left, Morlet_right], dim=1)  # 40x1x250
 
-        self.filters = (Morlet_filter).view(self.out_channels, 1, self.kernel_size).cuda()
+        self.filters = (Morlet_filter).view(self.out_channels, 1, self.kernel_size).to(waveforms.device)# .cuda()
 
         output = []
         for i in range(self.in_channels):
@@ -325,7 +328,8 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-
+        
+        
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
