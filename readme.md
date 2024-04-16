@@ -19,7 +19,11 @@ DATASET_TASK_CLASS = {
 
 # file organization
 
+<<<<<<< HEAD
 ```
+=======
+
+>>>>>>> cb983e5ee394025daf5b4cb3ac7872278eb63a5f
 ├── configs 
 ├── data
 │   ├── __pycache__
@@ -60,7 +64,11 @@ DATASET_TASK_CLASS = {
 ├── main_com.py
 ├── main.py
 └── post_analysis.ipynb
+<<<<<<< HEAD
 ```
+=======
+'''
+>>>>>>> cb983e5ee394025daf5b4cb3ac7872278eb63a5f
 
 # Signal_processing
 1. FFT：快速傅里叶变换。公式为：$X(k) = \sum_{n=0}^{N-1} x(n)e^{-j2\pi kn/N}$。
