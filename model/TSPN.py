@@ -105,6 +105,17 @@ class Classifier(nn.Module):
         x = x.view(x.size(0), -1)
         return self.clf(x)
 
+from .kan import KAN  # 
+class Kan_classifier(nn.Module):
+    def __init__(self, in_channels, num_classes): # TODO logic
+        super(Kan_classifier, self).__init__()
+        self.clf = KAN([in_channels, int(in_channels//4) ,num_classes])
+        # self.clf = nn.Linear(in_channels, num_classes)
+        
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        return self.clf(x)    
+
 class Transparent_Signal_Processing_Network(nn.Module):
     def __init__(self, signal_processing_modules,feature_extractor, args):
         super(Transparent_Signal_Processing_Network, self).__init__()
@@ -153,18 +164,32 @@ class Transparent_Signal_Processing_Network(nn.Module):
         x = self.clf(x)
         return x
     
+class Transparent_Signal_Processing_KAN(Transparent_Signal_Processing_Network):
+
+    def __init__(self, signal_processing_modules,feature_extractor, args):
+        super(Transparent_Signal_Processing_KAN, self).__init__(signal_processing_modules,
+                                                                    feature_extractor,
+                                                                      args)
+        self.init_classifier()
+    def init_classifier(self):
+        print('# build classifier')
+        self.clf = Kan_classifier(self.channel_for_classifier, self.args.num_classes).to(self.args.device)
+
+
+    
 if __name__ == '__main__':
     from config import args # for debug model
     from config import signal_processing_modules,feature_extractor_modules
     import torchinfo
     net = Transparent_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)
+    # net = Transparent_Signal_Processing_KAN(signal_processing_modules,feature_extractor_modules, args)
     x = torch.randn(2, 4096, 2).cuda()
     y = net(x)
     print(y.shape)
     
     net_summaary= torchinfo.summary(net.cuda(),(2,4096,2),device = "cuda")
     print(net_summaary)
-    with open(f'save/TSPN2.txt','w') as f:
+    with open(f'save/TSPN_WF.txt','w') as f:
         f.write(str(net_summaary))      
         
     # args = {

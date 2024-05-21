@@ -2,7 +2,8 @@
 
 ############# config##########
 import argparse
-from model.TSPN import Transparent_Signal_Processing_Network
+from model.TSPN import Transparent_Signal_Processing_Network \
+    , Transparent_Signal_Processing_KAN
 from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
 from trainer.utils import load_best_model_checkpoint
@@ -21,14 +22,23 @@ parser = argparse.ArgumentParser(description='TSPN')
 parser.add_argument('--config_dir', type=str, default='configs/config_basic.yaml',
                     help='The directory of the configuration file')
 configs,args,path = parse_arguments(parser)
+
 seed_everything(args.seed)    
 
 # 初始化模型
 signal_processing_modules, feature_extractor_modules = config_network(configs,args)
-network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args)
 
+
+MODEL_DICT = {
+    'TSPN': lambda args: Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
+    'TKAN': lambda args: Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args)
+}
+
+model_plain = MODEL_DICT[args.model](args)
+
+# network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args)
 #model trainer #
-model = Basic_plmodel(network, args)
+model = Basic_plmodel(model_plain, args)
 model_structure = print(model.network)
 trainer,train_dataloader, val_dataloader, test_dataloader = trainer_set(args,path)
 

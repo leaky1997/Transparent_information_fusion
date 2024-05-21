@@ -1,3 +1,4 @@
+from ast import arg
 import sys
 sys.path.append('./')
 
@@ -7,7 +8,7 @@ import numpy as np
 from pytorch_lightning import seed_everything
 from configs.config import parse_arguments, config_network,yaml_arguments
 
-from model.TSPN import Transparent_Signal_Processing_Network
+from model.TSPN import Transparent_Signal_Processing_Network,Transparent_Signal_Processing_KAN
 from model_collection.Resnet import ResNet, BasicBlock
 from model_collection.Sincnet import Sincnet,Sinc_net_m
 from model_collection.WKN import WKN,WKN_m
@@ -29,6 +30,9 @@ def load_models(config_dir,best_model_path=None):
     if args.model in ['TSPN']:
         signal_processing_modules, feature_extractor_modules = config_network(configs, args)
         network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules, args)
+    if args.model in ['TKAN']:
+        signal_processing_modules, feature_extractor_modules = config_network(configs, args)
+        network = Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args)
     else:
         args.ff = np.arange(0, args.in_dim//2 + 1) / args.in_dim//2 + 1
 
