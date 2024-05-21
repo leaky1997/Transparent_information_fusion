@@ -1,4 +1,6 @@
 # task 
+
+```
 import numpy as np
 data = np.load('/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/10hz_data.npy')
 labels = np.load('/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/10hz_label.npy')
@@ -16,7 +18,7 @@ DATASET_TASK_CLASS = {
     'THU_006_generalization': THU_006_generalization
     
 }
-
+```
 # file organization
 
 <<<<<<< HEAD
