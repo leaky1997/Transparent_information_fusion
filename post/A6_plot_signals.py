@@ -74,7 +74,8 @@ def plot_layer_outputs(network, data, num_classes, sample_id, sample_rate=4096):
                 plot_signals(signals=signal[id_fault].detach().cpu().numpy(),
                             rows=rows, cols=cols,
                             sample_rate=sample_rate,
-                            name=f'layer_{idx}_sample_{id_fault}')
+                            name=f'layer_{idx}_sample_3_{id_fault}',
+                            fre_range=300)
 
 def plot_final_outputs(signal,num_classes, sample_id, name = '',sample_rate=4096,fre_range = None):
     num_per_class = len(signal) // num_classes

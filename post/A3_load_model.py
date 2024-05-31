@@ -30,7 +30,7 @@ def load_models(config_dir,best_model_path=None):
     if args.model in ['TSPN']:
         signal_processing_modules, feature_extractor_modules = config_network(configs, args)
         network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules, args)
-    if args.model in ['TKAN']:
+    elif args.model in ['TKAN']:
         signal_processing_modules, feature_extractor_modules = config_network(configs, args)
         network = Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args)
     else:

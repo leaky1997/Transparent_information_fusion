@@ -85,11 +85,42 @@ def draw_network_structure(layer_top_weight,precision = 6,
         layer_levels[layer] += 1
 
     # 绘图
+    # plt.figure(figsize=(12, 8))
+    # nx.draw(G, pos, with_labels=True, node_size=2600, node_color="cornflowerblue", font_size=40, font_weight="bold", 
+    #         edge_color="gray", width=2, arrowstyle="->", arrowsize=10)
+    # edge_labels = nx.get_edge_attributes(G, 'weight')
+    # nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='yellowgreen', font_size=15)
+
+# # 绘图 改颜色
+#     plt.figure(figsize=(12, 8))
+#     edges = G.edges(data=True)
+#     weights = [d['weight'] for (u, v, d) in edges]
+#     edge_colors = [plt.cm.Blues(weight) for weight in weights]
+
+#     nx.draw(G, pos, with_labels=True, node_size=2600, node_color="cornflowerblue", 
+#             font_size=40, font_weight="bold", edge_color=edge_colors, width=2, 
+#             arrowstyle="->", arrowsize=10, alpha=0.7)
+#     edge_labels = nx.get_edge_attributes(G, 'weight')
+#     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='yellowgreen', font_size=15)
+
+## 改透明度
+    # 绘图
+    
     plt.figure(figsize=(12, 8))
+    edges = G.edges(data=True)
+    edge_weights = [d['weight'] for _, _, d in edges]
+    max_weight = max(edge_weights) if edge_weights else 1
+    min_weight = min(edge_weights) if edge_weights else 0.000001
+    edge_alphas = [(weight - min_weight) / (max_weight - min_weight) for weight in edge_weights]
+
+    edge_colors = [(0, 0, 0, alpha) for alpha in edge_alphas]
+
     nx.draw(G, pos, with_labels=True, node_size=2600, node_color="cornflowerblue", font_size=40, font_weight="bold", 
-            edge_color="gray", width=2, arrowstyle="->", arrowsize=10)
-    edge_labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='yellowgreen', font_size=15)
+            edge_color=edge_colors, width=2, arrowstyle="->", arrowsize=10)
+    
+    # edge_labels = nx.get_edge_attributes(G, 'weight')
+    # nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='yellowgreen', font_size=15)
+    
 
     plt.axis('off')  # 隐藏坐标轴
     plt.savefig(f'{save_path}/filter_flag_{filter_flag}{name}.png')
