@@ -71,7 +71,21 @@ for layer in config['signal_processing_configs'].values():
     signal_module = OrderedDict()
     for module_name in layer:
         module_class = ALL_SP[module_name]
-        signal_module[module_name] = module_class(args)  # 假设所有模块的构造函数不需要参数 ,但是有些模块需要参数
+
+    module_count = {}  # 用于跟踪每个模块名出现的次数
+    
+    for module_name in layer:
+        module_class = ALL_SP[module_name]
+        
+        # 检查模块名是否已存在
+        if module_name in module_count:
+            module_count[module_name] += 1
+            new_module_name = f"{module_name}_{module_count[module_name]}"
+        else:
+            module_count[module_name] = 0
+            new_module_name = module_name
+
+        signal_module[new_module_name] = module_class(args)  # 假设所有模块的构造函数不需要参数 ,但是有些模块需要参数
     signal_processing_modules.append(SignalProcessingModuleDict(signal_module))
 
 feature_extractor_modules = OrderedDict()

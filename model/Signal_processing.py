@@ -96,7 +96,6 @@ class WaveFilters(SignalProcessingBase):
         self.initialize_parameters()
         
         # 预生成滤波器
-        
 
     def initialize_parameters(self):
         # 根据提供的参数初始化f_c和f_b

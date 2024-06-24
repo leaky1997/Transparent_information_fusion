@@ -10,11 +10,11 @@ from torch import nn
 from torch.nn import init
 
 
-class SEAttention(nn.Module):
+class SPAttention(nn.Module):
 
-    def __init__(self, channel=512,reduction=16):
+    def __init__(self, channel=512,reduction=4):
         super().__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.avg_pool = nn.AdaptiveAvgPool1d(1)
         self.fc = nn.Sequential(
             nn.Linear(channel, channel // reduction, bias=False),
             nn.ReLU(inplace=True),
@@ -22,26 +22,13 @@ class SEAttention(nn.Module):
             nn.Sigmoid()
         )
 
-
-    def init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                init.kaiming_normal_(m.weight, mode='fan_out')
-                if m.bias is not None:
-                    init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                init.constant_(m.weight, 1)
-                init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                init.normal_(m.weight, std=0.001)
-                if m.bias is not None:
-                    init.constant_(m.bias, 0)
-
     def forward(self, x):
-        b, c, _, _ = x.size()
+        b, l, c = x.size()
+        x = rearrange(x, 'b l c -> b c l')
         y = self.avg_pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        return x * y.expand_as(x)
+        y = self.fc(y).view(b, c,1)
+        res = x * y
+        return rearrange(res, 'b c l -> b l c')
 
 class CustomBatchNorm(nn.Module):
     def __init__(self, num_features, eps=0.1):
@@ -68,7 +55,8 @@ class SignalProcessingLayer(nn.Module):
         super(SignalProcessingLayer, self).__init__()
         self.norm = nn.InstanceNorm1d(input_channels)
         self.weight_connection = nn.Linear(input_channels, output_channels)
-        self.attention = nn.MultiheadAttention(embed_dim=output_channels, num_heads=num_heads, batch_first=True)
+        self.channel_attention = SPAttention(channel = output_channels,reduction=4)
+        # self.attention = nn.MultiheadAttention(embed_dim=output_channels, num_heads=num_heads, batch_first=True)
         self.signal_processing_modules = signal_processing_modules
         self.module_num = len(signal_processing_modules)
         self.temperature = 0.1
@@ -84,9 +72,10 @@ class SignalProcessingLayer(nn.Module):
         
         self.weight_connection.weight.data = F.softmax((1.0 / self.temperature) *
                                                        self.weight_connection.weight.data, dim=0)
-        x_projected = self.weight_connection(normed_x)
+        x = self.weight_connection(normed_x)
+        x = self.channel_attention(x)
 
-        attn_output, _ = self.attention(x_projected, x_projected, x_projected)
+        # attn_output, _ = self.attention(x_projected, x_projected, x_projected)
         
 
         # 按模块数拆分
@@ -109,11 +98,11 @@ class FeatureExtractorlayer(nn.Module):
         super(FeatureExtractorlayer, self).__init__()
         self.weight_connection = nn.Linear(in_channels, out_channels)
         self.feature_extractor_modules = feature_extractor_modules
-        self.attention = nn.MultiheadAttention(embed_dim=out_channels, num_heads=num_heads, batch_first=True)
+        # self.attention = nn.MultiheadAttention(embed_dim=out_channels, num_heads=num_heads, batch_first=True)
         out_channels = int(len(feature_extractor_modules) * out_channels)
         
         self.norm = CustomBatchNorm(out_channels)
-        
+        self.FEAttention = SPAttention(channel = out_channels,reduction=4)
         # self.temperature = 1
     # def norm(self,x): # feature normalization
     #     mean = x.mean(dim = 0,keepdim = True)
@@ -130,7 +119,9 @@ class FeatureExtractorlayer(nn.Module):
         for module in self.feature_extractor_modules.values():
             outputs.append(module(x))
         res = torch.cat(outputs, dim=1).squeeze() # B,C
-        return self.norm(res)
+        res = self.norm(res).unsqueeze(1)
+        res = self.FEAttention(res)
+        return res
 
 class Classifier(nn.Module):
     def __init__(self, in_channels, num_classes): # TODO logic
@@ -206,13 +197,13 @@ if __name__ == '__main__':
     import torchinfo
     net = NN_Signal_Processing_Network(signal_processing_modules,feature_extractor_modules, args)
     # net = Transparent_Signal_Processing_KAN(signal_processing_modules,feature_extractor_modules, args)
-    x = torch.randn(2, 4096, 2).cuda()
+    x = torch.randn(3, 512, 2).cuda()
     y = net(x)
     print(y.shape)
     
-    net_summaary= torchinfo.summary(net.cuda(),(2,4096,2),device = "cuda")
+    net_summaary= torchinfo.summary(net.cuda(),(3,512,2),device = "cuda")
     print(net_summaary)
-    with open(f'save/TSPN_WF.txt','w') as f:
+    with open(f'save/NNSPN.txt','w') as f:
         f.write(str(net_summaary))      
         
     # args = {

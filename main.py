@@ -4,6 +4,7 @@
 import argparse
 from model.TSPN import Transparent_Signal_Processing_Network \
     , Transparent_Signal_Processing_KAN
+from model.NNSPN import NN_Signal_Processing_Network
 from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
 from trainer.utils import load_best_model_checkpoint
@@ -31,7 +32,8 @@ signal_processing_modules, feature_extractor_modules = config_network(configs,ar
 
 MODEL_DICT = {
     'TSPN': lambda args: Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
-    'TKAN': lambda args: Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args)
+    'TKAN': lambda args: Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args),
+    'NNSPN': lambda args: NN_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
 }
 
 model_plain = MODEL_DICT[args.model](args)
