@@ -94,7 +94,7 @@ class SignalProcessingLayer(nn.Module):
         return x
     
 class FeatureExtractorlayer(nn.Module):
-    def __init__(self, feature_extractor_modules,in_channels=1, num_heads = 4,out_channels=1):
+    def __init__(self, feature_extractor_modules,in_channels=1, out_channels=1):
         super(FeatureExtractorlayer, self).__init__()
         self.weight_connection = nn.Linear(in_channels, out_channels)
         self.feature_extractor_modules = feature_extractor_modules
@@ -170,7 +170,9 @@ class NN_Signal_Processing_Network(nn.Module):
 
     def init_feature_extractor_layers(self):
         print('# build feature extractor layers')
-        self.feature_extractor_layers = FeatureExtractorlayer(self.feature_extractor_modules,self.channel_for_feature,self.channel_for_feature).to(self.args.device)
+        self.feature_extractor_layers = FeatureExtractorlayer(self.feature_extractor_modules,
+                                                              in_channels = self.channel_for_feature,
+                                                              out_channels = self.channel_for_feature).to(self.args.device)
         len_feature = len(self.feature_extractor_modules)
         self.channel_for_classifier = self.channel_for_feature * len_feature
 
