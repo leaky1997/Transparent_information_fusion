@@ -32,6 +32,7 @@ args:
   f_b_sigma: 0.1
 
 # hyperparameter
+  wandb_flag: False
   learnable_parameter_learning_rate: 0.001
   learning_rate: 0.001
   batch_size: 64
@@ -49,5 +50,5 @@ args:
 
   log_parameters: True
 
-  pruning: False # [0.7,0.5,0.01]
+  pruning: [0.7,0.5,0.01]
   snr: 1

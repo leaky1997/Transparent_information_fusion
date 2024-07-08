@@ -15,6 +15,7 @@ from model.Signal_processing import SignalProcessingBase,\
         HilbertTransform,\
         WaveFilters,\
         Identity
+from model.Signal_processing import *
 
 from model.Feature_extract import FeatureExtractionBase,\
         FeatureExtractionModuleDict,\
@@ -31,11 +32,34 @@ from model.Feature_extract import FeatureExtractionBase,\
         SkewnessFeature,\
         ClearanceFactorFeature,\
         ShapeFactorFeature
+from model.Logic_inference import LogicInferenceBase,\
+        ImplicationOperation,\
+        EquivalenceOperation,\
+        NegationOperation,\
+        WeakConjunctionOperation,\
+        WeakDisjunctionOperation,\
+        StrongConjunctionOperation,\
+        StrongDisjunctionOperation
 ALL_SP = {
     'FFT': FFTSignalProcessing,
     'HT': HilbertTransform,
     'WF': WaveFilters,
     'I': Identity,
+    'Morlet':Morlet, # 'Morlet':Morlet,
+    'Laplace':Laplace,
+    'Order1MAFilter':Order1MAFilter,
+    'Order2MAFilter':Order2MAFilter,
+    'Order1DFFilter':Order1DFFilter,
+    'Order2DFFilter':Order2DFFilter,
+    'Log':LogOperation,
+    'Squ':SquOperation,
+    'Sin':SinOperation,
+    # 2arity
+    'Add':AddOperation,
+    'Mul':MulOperation,
+    'Div':DivOperation,
+    
+    
 }
 ALL_FE = {
     'Mean': MeanFeature,
@@ -51,6 +75,16 @@ ALL_FE = {
     'Skewness': SkewnessFeature,
     'ClearanceFactor': ClearanceFactorFeature,
     'ShapeFactor': ShapeFactorFeature,
+}
+
+ALL_LI = {
+    'imp': ImplicationOperation,
+    'equ': EquivalenceOperation,
+    'neg': NegationOperation,
+    'conj': WeakConjunctionOperation,
+    'disj': WeakDisjunctionOperation,
+    'sconj': StrongConjunctionOperation,
+    'sdisj': StrongDisjunctionOperation,
 }
 
 def parse_arguments(parser):
@@ -72,7 +106,7 @@ def parse_arguments(parser):
     print(f'Running experiment: {name}')
     
     # if args.debug != 'True':
-    path = 'save/' + f'model_{args.model}/' + name
+    path = 'save/' + f'task_{args.dataset_task}/'+f'model_{args.model}/' + name
     if not os.path.exists(path):
         os.makedirs(path)
     

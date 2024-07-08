@@ -3,13 +3,13 @@ from os import pread
 # from altair import AllSortString
 import torch
 from torch import nn
-
 from Signal_processing import SignalProcessingBase,\
         SignalProcessingModuleDict,\
         FFTSignalProcessing,\
         HilbertTransform,\
         WaveFilters,\
         Identity
+from Signal_processing import *
 
 from Feature_extract import FeatureExtractionBase,\
         FeatureExtractionModuleDict,\
@@ -26,11 +26,34 @@ from Feature_extract import FeatureExtractionBase,\
         SkewnessFeature,\
         ClearanceFactorFeature,\
         ShapeFactorFeature
+from Logic_inference import LogicInferenceBase,\
+        ImplicationOperation,\
+        EquivalenceOperation,\
+        NegationOperation,\
+        WeakConjunctionOperation,\
+        WeakDisjunctionOperation,\
+        StrongConjunctionOperation,\
+        StrongDisjunctionOperation
 ALL_SP = {
     'FFT': FFTSignalProcessing,
     'HT': HilbertTransform,
     'WF': WaveFilters,
     'I': Identity,
+    'Morlet':Morlet, # 'Morlet':Morlet,
+    'Laplace':Laplace,
+    'Order1MAFilter':Order1MAFilter,
+    'Order2MAFilter':Order2MAFilter,
+    'Order1DFFilter':Order1DFFilter,
+    'Order2DFFilter':Order2DFFilter,
+    'Log':LogOperation,
+    'Squ':SquOperation,
+    'Sin':SinOperation,
+    # 2arity
+    'Add':AddOperation,
+    'Mul':MulOperation,
+    'Div':DivOperation,
+    
+    
 }
 ALL_FE = {
     'Mean': MeanFeature,
@@ -47,6 +70,16 @@ ALL_FE = {
     'ClearanceFactor': ClearanceFactorFeature,
     'ShapeFactor': ShapeFactorFeature,
 }
+
+ALL_LI = {
+    'imp': ImplicationOperation,
+    'equ': EquivalenceOperation,
+    'neg': NegationOperation,
+    'conj': WeakConjunctionOperation,
+    'disj': WeakDisjunctionOperation,
+    'sconj': StrongConjunctionOperation,
+    'sdisj': StrongDisjunctionOperation,
+}
 # logic
 
 import torch
@@ -58,7 +91,7 @@ from collections import OrderedDict
 import yaml
 from types import SimpleNamespace
 
-config_dir = 'configs/config_basic.yaml'
+config_dir = 'configs/THU_006/config_DEN_gen.yaml'# configs/config_basic.yaml
 # 读取YAML文件
 with open(config_dir, 'r') as f:
     config = yaml.safe_load(f)

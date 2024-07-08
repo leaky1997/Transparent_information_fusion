@@ -7,7 +7,7 @@
 *.pyc
 # 日志文件
 *.log
-
+wandb/
 # 临时文件
 *.tmp
 
@@ -50,3 +50,6 @@ main_kshotexp.py
 post_analysis.ipynb
 post_analysis.ipynb
 post_analysis.ipynb
+wandb/run-20240626_205217-20h2ghze/run-20h2ghze.wandb
+/sweep_config
+script/NNSPN_paper/sweep_config/

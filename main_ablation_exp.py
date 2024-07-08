@@ -2,7 +2,10 @@
 
 ############# config##########
 import argparse
-from model.TSPN import Transparent_Signal_Processing_Network
+from model.TSPN import Transparent_Signal_Processing_Network, Transparent_Signal_Processing_KAN
+from model.NNSPN import NN_Signal_Processing_Network
+
+
 from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set
 from trainer.utils import load_best_model_checkpoint
@@ -24,16 +27,26 @@ configs,args,path = parse_arguments(parser)
 seed_everything(args.seed)    
 
 # 初始化模型
+# 初始化模型
 signal_processing_modules, feature_extractor_modules = config_network(configs,args)
-network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args)
+
+
+MODEL_DICT = {
+    'TSPN': lambda args: Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
+    'TKAN': lambda args: Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args),
+    'NNSPN': lambda args: NN_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
+}
+
+
 
 #model trainer #
 all_results_df = pd.DataFrame()
-for lr_weight in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
-    for lr_parameter in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
+for lr_weight in [0.01,0.001, 0.0001, 0.00001]:
+    for lr_parameter in [0.01,0.001, 0.0001, 0.00001]:
         print(f'lr_weight: {lr_weight}, lr_parameter: {lr_parameter}')
         args.learning_rate = lr_weight
         args.learnable_parameter_learning_rate = lr_parameter
+        network = MODEL_DICT[args.model](args)
         model = Basic_plmodel(network, args)
         trainer, train_dataloader, val_dataloader, test_dataloader = trainer_set(args, path)
 
@@ -42,6 +55,11 @@ for lr_weight in [0.1, 0.01, 0.001, 0.0001, 0.00001]:
         model = load_best_model_checkpoint(model,trainer)
         # 测试
         result = trainer.test(model, test_dataloader)
+
+        del model
+        del network
+        del trainer
+        del train_dataloader
 
         # 将测试结果、学习率和参数学习率添加到字典中
         result_dict = {'learning_rate_weight': lr_weight, 'learnable_parameter_learning_rate': lr_parameter, **result[0]}

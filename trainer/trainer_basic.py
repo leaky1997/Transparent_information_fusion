@@ -8,8 +8,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torchmetrics
-from .utils import l1_reg,get_all_layers
-
+from .utils import l1_reg,get_all_layers,wgn2
+import numpy as np
 
 class Basic_plmodel(pl.LightningModule):
     def __init__(self, network,args):
@@ -21,7 +21,9 @@ class Basic_plmodel(pl.LightningModule):
         self.acc_train = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classes)
         self.acc_test = torchmetrics.Accuracy(task = "multiclass",num_classes = args.num_classes)
         
-        self.save_hyperparameters(ignore = ['network'])
+        args_dict = vars(args)
+        self.save_hyperparameters(args_dict,
+                                  ignore = ['network'])
     
         # print('### network:\n',self.network)
         
@@ -31,6 +33,11 @@ class Basic_plmodel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        if self.args.snr:
+            # print('add noise')
+            snr = np.random.randint(self.args.snr,0) if self.args.snr < 0 else np.random.randint(0,self.args.snr)
+            x = wgn2(x, snr)
+            
         y_hat = self(x)
         loss = self.loss(y_hat, y.long())
 

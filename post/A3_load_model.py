@@ -1,6 +1,6 @@
 from ast import arg
 import sys
-sys.path.append('./')
+sys.path.append('/home/user/LQ/B_Signal/Transparent_information_fusion/')
 
 import torch
 import pandas as pd
@@ -9,6 +9,8 @@ from pytorch_lightning import seed_everything
 from configs.config import parse_arguments, config_network,yaml_arguments
 
 from model.TSPN import Transparent_Signal_Processing_Network,Transparent_Signal_Processing_KAN
+from model.NNSPN import NN_Signal_Processing_Network
+
 from model_collection.Resnet import ResNet, BasicBlock
 from model_collection.Sincnet import Sincnet,Sinc_net_m
 from model_collection.WKN import WKN,WKN_m
@@ -27,12 +29,13 @@ def load_models(config_dir,best_model_path=None):
     seed_everything(args.seed)
     
     # 根据配置初始化模型
-    if args.model in ['TSPN']:
+    if args.model in ['TSPN','TKAN','NNSPN']:
         signal_processing_modules, feature_extractor_modules = config_network(configs, args)
-        network = Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules, args)
-    elif args.model in ['TKAN']:
-        signal_processing_modules, feature_extractor_modules = config_network(configs, args)
-        network = Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args)
+        MODEL_DICT = {
+            'TSPN': lambda args: Transparent_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
+            'TKAN': lambda args: Transparent_Signal_Processing_KAN(signal_processing_modules, feature_extractor_modules,args),
+            'NNSPN': lambda args: NN_Signal_Processing_Network(signal_processing_modules, feature_extractor_modules,args),
+}
     else:
         args.ff = np.arange(0, args.in_dim//2 + 1) / args.in_dim//2 + 1
 
@@ -44,7 +47,9 @@ def load_models(config_dir,best_model_path=None):
             'TFN_Morlet': lambda args: TFN_Morlet(in_channels=args.in_channels, out_channels=args.num_classes),
             'MCN_GFK': lambda args: MultiChannel_MCN_GFK(ff=args.ff, in_channels=args.in_channels, num_MFKs=8, num_classes=args.num_classes),
         }
-        network = MODEL_DICT[args.model](args)
+    network = MODEL_DICT[args.model](args)
+
+    args.wandb_flag = False if not hasattr(args, 'wandb_flag') else args.wandb_flag
 
     # 准备数据加载器
     _, _, _, test_dataloader = trainer_set(args, path)

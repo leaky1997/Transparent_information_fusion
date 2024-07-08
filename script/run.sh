@@ -13,6 +13,7 @@ python main_com.py --config_dir configs/THU_006/config_MWA_CNN.yaml
 # 006 gen
 python main.py --config_dir configs/THU_006/config_NNSPN_gen.yaml #
 python main.py --config_dir configs/THU_006/config_TSPN_gen.yaml
+python main.py --config_dir configs/THU_006/config_DEN_gen.yaml
 python main.py --config_dir configs/THU_006/config_TKAN_gen.yaml
 python main_com.py --config_dir configs/THU_006/config_WKN_gen.yaml
 python main_com.py --config_dir configs/THU_006/config_Sincnet_gen.yaml

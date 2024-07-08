@@ -2,8 +2,8 @@
 
 ############# config##########
 import argparse
-from model.TSPN import Transparent_Signal_Processing_Network \
-    , Transparent_Signal_Processing_KAN
+from model.TSPN import Transparent_Signal_Processing_Network 
+from model.TSPN_KAN import Transparent_Signal_Processing_KAN
 from model.NNSPN import NN_Signal_Processing_Network
 from trainer.trainer_basic import Basic_plmodel
 from trainer.trainer_set import trainer_set

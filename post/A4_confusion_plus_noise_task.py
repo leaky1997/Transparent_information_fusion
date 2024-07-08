@@ -46,15 +46,19 @@ def heatmap_confusion(predictions, test_labels, args,
 
 ###################### noise ######################
 
-def add_noise(data, snr):
+def add_noise(x, snr):
     """
     向数据添加高斯噪声。
     """
-    snr = 10 ** (snr / 10.0)
-    x_power = torch.sum(data ** 2) / data.numel()
-    noise_power = x_power / snr
-    noise = torch.randn_like(data) * torch.sqrt(noise_power)
-    return data + noise
+    # snr = 10 ** (snr / 10.0)
+    # x_power = torch.sum(data ** 2) / data.numel()
+    # noise_power = x_power / snr
+    # noise = torch.randn_like(data) * torch.sqrt(noise_power)
+    # return data + noise
+    snr = 10**(snr/10.0)
+    xpower = torch.sum(x**2)/(x.size(0)*x.size(1)*x.size(2))
+    npower = xpower / snr
+    return torch.rand(x.size()).cuda() * torch.sqrt(npower) + x
 
 def plot_accuracy_vs_snr(test_data, test_labels, model_dict, snr_levels, plot_dir='./plot'):
 
@@ -63,13 +67,14 @@ def plot_accuracy_vs_snr(test_data, test_labels, model_dict, snr_levels, plot_di
     line_styles = ['-', '--', '-.', ':','-', '--',]
     
     # lenth = len(model_dict)
+    plt.figure(figsize=(10, 6))
     for name, model in model_dict.items():
         file_name = f'{name}_accuracy_vs_snr'
         accuracies = record_noise_accuracy(test_data, test_labels, model, snr_levels, plot_dir, file_name)
         
         
         index = list(model_dict.keys()).index(name)
-        plt.figure(figsize=(10, 6))
+        
         plt.plot(snr_levels, accuracies,
                  label=name, linewidth=2,
                  linestyle=line_styles[index],
@@ -79,7 +84,7 @@ def plot_accuracy_vs_snr(test_data, test_labels, model_dict, snr_levels, plot_di
         plt.xlabel('SNR (dB)')
         plt.ylabel('Accuracy')
         # plt.title('Accuracy vs. SNR')
-    plt.legend('best')
+    plt.legend(loc='best')
     plt.grid(True)
     plt.savefig(os.path.join(plot_dir, file_name) + '.pdf', dpi=512)
     plt.savefig(os.path.join(plot_dir, file_name) + '.svg', dpi=512)
@@ -91,6 +96,7 @@ def record_noise_accuracy(test_data, test_labels, model, snr_levels, plot_dir, f
     accuracies = []
     test_data = torch.tensor(test_data).cuda()
     test_labels = torch.tensor(test_labels).cuda()
+    model = model.cuda()
     for snr in snr_levels:
         noisy_data = add_noise(test_data, snr)
         with torch.no_grad():
@@ -98,6 +104,8 @@ def record_noise_accuracy(test_data, test_labels, model, snr_levels, plot_dir, f
         acc = (preds == test_labels).float().mean().item()
         accuracies.append(acc)
     pd.DataFrame(accuracies, columns=['Accuracy']).to_csv(os.path.join(plot_dir, f'{file_name}_noise_accuracy_list.csv'), index=False)
+    model = model.cpu()
+    torch.cuda.empty_cache()
     return accuracies
 
 # # 设置噪声级别范围

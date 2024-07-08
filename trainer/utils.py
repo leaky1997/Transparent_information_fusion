@@ -5,6 +5,13 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import LightningModule, Trainer
 
 
+def wgn2(x, snr):
+    "加随机噪声"
+    snr = 10**(snr/10.0)
+    xpower = torch.sum(x**2)/(x.size(0)*x.size(1)*x.size(2))
+    npower = xpower / snr
+    return torch.rand(x.size()).cuda() * torch.sqrt(npower) + x
+
 def l1_reg(param):
     return torch.sum(torch.abs(param))
 

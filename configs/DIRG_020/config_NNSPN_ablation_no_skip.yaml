@@ -18,7 +18,7 @@ args:
 
 # model
   model: NNSPN
-  skip_connection: True
+  skip_connection: False
   num_classes: 7
   in_dim : 4096
   out_dim : 4096
@@ -32,7 +32,7 @@ args:
   f_b_sigma: 0.1
 
 # hyperparameter
-  learnable_parameter_learning_rate: 0.001
+  # wandb_flag: False
   learning_rate: 0.001
   batch_size: 64
   num_epochs: 300
@@ -42,12 +42,12 @@ args:
 
 # train
   monitor: 'val_loss'
-  patience: 100
+  patience: 10
   gpus: 1
   weight_decay: 0.0001
   l1_norm: 0.001
 
   log_parameters: True
 
-  pruning: False # [0.7,0.5,0.01]
+  pruning: [0.7,0.5,0.01]
   snr: 1

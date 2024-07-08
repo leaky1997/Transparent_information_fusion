@@ -105,16 +105,16 @@ class Classifier(nn.Module):
         x = x.view(x.size(0), -1)
         return self.clf(x)
 
-from .kan import KAN  # 
-class Kan_classifier(nn.Module):
-    def __init__(self, in_channels, num_classes): # TODO logic
-        super(Kan_classifier, self).__init__()
-        self.clf = KAN([in_channels, int(in_channels//4) ,num_classes])
-        # self.clf = nn.Linear(in_channels, num_classes)
+# from .kan import KAN  # 
+# class Kan_classifier(nn.Module):
+#     def __init__(self, in_channels, num_classes): # TODO logic
+#         super(Kan_classifier, self).__init__()
+#         self.clf = KAN([in_channels, int(in_channels//4) ,num_classes])
+#         # self.clf = nn.Linear(in_channels, num_classes)
         
-    def forward(self, x):
-        x = x.view(x.size(0), -1)
-        return self.clf(x)    
+#     def forward(self, x):
+#         x = x.view(x.size(0), -1)
+#         return self.clf(x)    
 
 class Transparent_Signal_Processing_Network(nn.Module):
     def __init__(self, signal_processing_modules,feature_extractor, args):
@@ -164,16 +164,16 @@ class Transparent_Signal_Processing_Network(nn.Module):
         x = self.clf(x)
         return x
     
-class Transparent_Signal_Processing_KAN(Transparent_Signal_Processing_Network):
+# class Transparent_Signal_Processing_KAN(Transparent_Signal_Processing_Network):
 
-    def __init__(self, signal_processing_modules,feature_extractor, args):
-        super(Transparent_Signal_Processing_KAN, self).__init__(signal_processing_modules,
-                                                                    feature_extractor,
-                                                                      args)
-        self.init_classifier()
-    def init_classifier(self):
-        print('# build classifier')
-        self.clf = Kan_classifier(self.channel_for_classifier, self.args.num_classes).to(self.args.device)
+#     def __init__(self, signal_processing_modules,feature_extractor, args):
+#         super(Transparent_Signal_Processing_KAN, self).__init__(signal_processing_modules,
+#                                                                     feature_extractor,
+#                                                                       args)
+#         self.init_classifier()
+#     def init_classifier(self):
+#         print('# build classifier')
+#         self.clf = Kan_classifier(self.channel_for_classifier, self.args.num_classes).to(self.args.device)
 
 
     

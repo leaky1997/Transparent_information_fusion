@@ -5,6 +5,7 @@ import torch.utils.model_zoo as model_zoo
 import torch.nn.functional as F
 import math
 from einops import rearrange
+import numpy as np
 
 def conv3x1(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -124,6 +125,8 @@ class SincConv_multiple_channel(nn.Module):
         self.a_ = nn.Parameter(torch.linspace(1, 10, out_channels)).view(-1, 1)
         self.b_ = nn.Parameter(torch.linspace(0, 10, out_channels)).view(-1, 1)
 
+        self.channel_linear = conv1x1(int(in_channels * out_channels), 64) # 6*10 ， 64  
+
     def forward(self, waveforms):
         half_kernel = self.kernel_size // 2
         time_disc = torch.linspace(-half_kernel, half_kernel, steps=self.kernel_size).to(waveforms.device)
@@ -143,7 +146,11 @@ class SincConv_multiple_channel(nn.Module):
         output = []
         for i in range(self.in_channels):
             output.append(F.conv1d(waveforms[:, i:i+1], self.filters, stride=1, padding=half_kernel, dilation=1, bias=None, groups=1))
-        return torch.cat(output, dim=1)
+
+        res = torch.cat(output, dim=1)
+        res = self.channel_linear(res)
+
+        return res
 
 
 class Morlet_multiple_channel(nn.Module):
@@ -162,6 +169,8 @@ class Morlet_multiple_channel(nn.Module):
         self.a_ = nn.Parameter(torch.linspace(1, 10, out_channels)).view(-1, 1)
 
         self.b_ = nn.Parameter(torch.linspace(0, 10, out_channels)).view(-1, 1)
+
+        self.channel_linear = conv1x1(int(in_channels * out_channels), 64) # 6*10 ， 64  
 
     def forward(self, waveforms):
 
@@ -184,7 +193,10 @@ class Morlet_multiple_channel(nn.Module):
         output = []
         for i in range(self.in_channels):
             output.append(F.conv1d(waveforms[:, i:i+1], self.filters, stride=1, padding=1, dilation=1, bias=None, groups=1))
-        return torch.cat(output, dim=1)
+
+        res = self.channel_linear(torch.cat(output, dim=1))
+
+        return res
 
 
 class BasicBlock(nn.Module):

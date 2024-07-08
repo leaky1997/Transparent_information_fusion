@@ -1,7 +1,10 @@
 from numpy import identity
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as Fs
+import sys
+sys.path.append('/home/user/LQ/B_Signal/Transparent_information_fusion/model')
+from .utils import convlutional_operator, signal_filter_, FRE
 
 # base class for signal processing modules
 class SignalProcessingBase(torch.nn.Module):
@@ -21,12 +24,52 @@ class SignalProcessingBase(torch.nn.Module):
         raise NotImplementedError("This method should be implemented by subclass.")
     
     def test_forward(self):
-        test_input = torch.randn(2, self.in_dim, self.in_channels)
+        test_input = torch.randn(2, self.in_dim, self.in_channels).to(self.device) 
         output = self.forward(test_input)
         assert output.shape == (2, self.out_dim, self.out_channels), f"\
         input shape is {test_input.shape}, \n\
         Output shape is {output.shape}, \n\
         expected {(2, self.out_dim, self.out_channels)}"
+
+class SignalProcessingBase2Arity(torch.nn.Module):
+    def __init__(self, args):
+        super(SignalProcessingBase2Arity, self).__init__()
+        self.args = args
+        self.in_dim = args.in_dim
+        self.out_dim = args.out_dim
+        self.in_channels = args.in_channels
+        self.out_channels = args.out_channels //2
+        self.device = args.device
+        self.to(self.device)
+
+    def split_input(self, x):
+        # 拆分输入信号
+        half_channels = x.shape[-1] // 2
+        x1 = x[:, :, :half_channels]
+        x2 = x[:, :, half_channels:]
+        return x1, x2
+    
+    def repeat_output(self, x):
+        # 合并输出信号
+        return torch.cat((x, x), dim=-1)
+
+    def forward(self, x):
+        x1, x2 = self.split_input(x)
+        x = self.operation(x1, x2)
+        x = self.repeat_output(x)
+        return x
+
+    def operation(self, x1, x2):
+        raise NotImplementedError("This method should be implemented by subclass.")
+    
+    def test_forward(self):
+        test_input = torch.randn(2, self.in_dim, self.in_channels).to(self.device)
+        output = self.forward(test_input)
+        assert output.shape == (2, self.out_dim, self.out_channels), f"\
+        input shape is {test_input.shape}, \n\
+        Output shape is {output.shape}, \n\
+        expected {(2, self.out_dim, self.out_channels)}"
+
 
 class SignalProcessingModuleDict(torch.nn.ModuleDict):
     def __init__(self, module_dict):
@@ -45,7 +88,7 @@ class SignalProcessingModuleDict(torch.nn.ModuleDict):
 # TODO
 # SignalProcessingModuleDict_2_arity
 # subclass for FFT module
-
+# 1
 class FFTSignalProcessing(SignalProcessingBase):
     '''
     args:
@@ -60,7 +103,7 @@ class FFTSignalProcessing(SignalProcessingBase):
         fft_result = torch.fft.rfft(x, dim=1, norm='ortho')  # 对长度L进行FFT
         return fft_result
 
-# ############################################## subclass for Hilbert module###############################################  
+# 2 ############################################## subclass for Hilbert module###############################################  
 class HilbertTransform(SignalProcessingBase):
     def __init__(self, args):
         # 希尔伯特变换不改变维度
@@ -77,7 +120,7 @@ class HilbertTransform(SignalProcessingBase):
             Xf[..., (N + 1) // 2:] = 0
         return torch.fft.ifft(Xf, dim=1).abs()
     
-###############################################  WaveFilters module  ############################################## 
+# 3 ##############################################  WaveFilters module  ############################################## 
 class WaveFilters(SignalProcessingBase):
     def __init__(self, args):
         super(WaveFilters, self).__init__(args)
@@ -124,13 +167,126 @@ class WaveFilters(SignalProcessingBase):
         return x_hat.real
 
 
-############################################## Identity module #######################################
+# 4 ############################################# Identity module #######################################
 class Identity(SignalProcessingBase):
     def __init__(self, args):
         super(Identity, self).__init__(args)
         self.name = "I"
     def forward(self, x):
         return x
+
+
+#%% 5 
+
+class Morlet(SignalProcessingBase):
+    def __init__(self, args):
+        super(Morlet, self).__init__(args)
+        self.name = "Morlet"
+        self.convolution_operator = convlutional_operator('Morlet', in_channels=args.scale, device=args.device)
+
+    def forward(self, x):
+        x_transformed = self.convolution_operator(x)
+        return x_transformed
+    #%% Laplace
+class Laplace(SignalProcessingBase):
+    def __init__(self, args):
+        super(Laplace, self).__init__(args)
+        self.name = "Laplace"
+        self.convolution_operator = convlutional_operator('Laplace', in_channels=args.scale, device=args.device)
+
+    def forward(self, x):
+        x_transformed = self.convolution_operator(x)
+        return x_transformed
+    #%% Order1MAFilter
+class Order1MAFilter(SignalProcessingBase):
+    def __init__(self, args):
+        super(Order1MAFilter, self).__init__(args)
+        self.name = "order1_MA"
+        self.filter_operator = signal_filter_('order1_MA', in_channels=args.scale, device=args.device)
+
+    def forward(self, x):
+        x_transformed = self.filter_operator(x)
+        return x_transformed
+    #%% Order2MAFilter
+class Order2MAFilter(SignalProcessingBase):
+    def __init__(self, args):
+        super(Order2MAFilter, self).__init__(args)
+        self.name = "order2_MA"
+        self.filter_operator = signal_filter_('order2_MA', in_channels=args.scale, device=args.device)
+
+    def forward(self, x):
+        x_transformed = self.filter_operator(x)
+        return x_transformed
+
+class Order1DFFilter(SignalProcessingBase):
+    def __init__(self, args):
+        super(Order1DFFilter, self).__init__(args)
+        self.name = "order1_DF"
+        self.filter_operator = signal_filter_('order1_DF', in_channels=args.scale, device=args.device)
+
+    def forward(self, x):
+        x_transformed = self.filter_operator(x)
+        return x_transformed
+
+class Order2DFFilter(SignalProcessingBase):
+    def __init__(self, args):
+        super(Order2DFFilter, self).__init__(args)
+        self.name = "order2_DF"
+        self.filter_operator = signal_filter_('order2_DF', in_channels=args.scale, device=args.device)
+
+    def forward(self, x):
+        x_transformed = self.filter_operator(x)
+        return x_transformed
+
+class LogOperation(SignalProcessingBase):
+    def __init__(self, args):
+        super(LogOperation, self).__init__(args)
+        self.name = "Log"
+
+    def forward(self, x):
+        return torch.log(x)
+class SquOperation(SignalProcessingBase):
+    def __init__(self, args):
+        super(SquOperation, self).__init__(args)
+        self.name = "Squ"
+
+    def forward(self, x):
+        return x ** 2
+
+class SinOperation(SignalProcessingBase):
+    def __init__(self, args):
+        super(SinOperation, self).__init__(args)
+        self.name = "sin"
+        self.fre = FRE # TODO learbable
+
+    def forward(self, x):
+        return torch.sin(self.fre * x)
+
+###############################################2 arity###################################################
+class AddOperation(SignalProcessingBase2Arity):
+    def __init__(self, args):
+        super(AddOperation, self).__init__(args)
+        self.name = "add"
+
+    def operation(self, x1, x2):
+        return x1 + x2
+    
+class MulOperation(SignalProcessingBase2Arity):
+    def __init__(self, args):
+        super(MulOperation, self).__init__(args)
+        self.name = "mul"
+
+    def operation(self, x1, x2):
+        return x1 * x2
+    
+class DivOperation(SignalProcessingBase2Arity):
+    def __init__(self, args):
+        super(DivOperation, self).__init__(args)
+        self.name = "div"
+
+    def operation(self, x1, x2):
+        return x1 / (x2 + 1e-8)
+
 
 if __name__ == "__main__":
     # 测试模块
@@ -165,6 +321,8 @@ if __name__ == "__main__":
         "$FO$": hilbert_module,
         "$HT$": wave_filter_module,
         "$I$": identity_module,
+# for test
+
     }
 
     signal_processing_modules = SignalProcessingModuleDict(module_dict)

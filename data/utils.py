@@ -5,7 +5,7 @@ def wgn2(x, snr):
     snr = 10**(snr/10.0)
     xpower = torch.sum(x**2)/(x.size(0)*x.size(1)*x.size(2))
     npower = xpower / snr
-    return torch.rand(x.size()).cuda() * torch.sqrt(npower)
+    return torch.rand(x.size()).cuda() * torch.sqrt(npower) + x
 
 class AddNoiseTransform:
     def __init__(self, snr):

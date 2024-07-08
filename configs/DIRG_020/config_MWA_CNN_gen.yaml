@@ -1,16 +1,7 @@
-signal_processing_configs:
-  layer1: ['HT','WF','I']
-  layer2: ['HT','WF','I']
-  layer3: ['HT','WF','I']
-  layer4: ['HT','WF','I']
-  # layer5: ['HT','WF','I']
-  # layer6: ['HT','WF','I']
-  # layer7: ['HT','WF','I']
-  # layer8: ['HT','WF','I'] 
 
-feature_extractor_configs: ['Mean', 'Std', 'Var', 'Entropy','Max', 'Min', 'AbsMean', 'Kurtosis', 'RMS', 'CrestFactor','Skewness', 'ClearanceFactor', 'ShapeFactor']
 
 args:
+
   device: cuda
   data_dir: '/home/user/data/a_bearing/a_020_DIRG_pro/' # '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' '/home/user/data/a_bearing/a_018_THU24_pro/'
   dataset_task: DIRG_020_geberalization # THU_006_basic THU_006_generalization THU_006_fusion THU_018_basic THU_018_generalization THU_018_fusion
@@ -20,14 +11,14 @@ args:
 
 
 # model
-  model: NNSPN
+  model: 'Huan_net'
   skip_connection: True
   num_classes: 7
   in_dim : 4096
   out_dim : 4096
   in_channels : 6
   out_channels : 3
-  scale : 6
+  scale : 4
 
   f_c_mu: 0
   f_c_sigma: 0.1
@@ -43,12 +34,12 @@ args:
 
 # train
   monitor: 'val_loss'
-  patience: 50
+  patience: 100
   gpus: 1
   weight_decay: 0.0001
-  l1_norm: 0.001
+  l1_norm: 0.0001
 
   log_parameters: True
 
-  pruning: False # [0.7,0.5,0.01]
+  pruning: None # [0.7,0.5,0.01]
   snr: 1
