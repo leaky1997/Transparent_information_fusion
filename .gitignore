@@ -53,3 +53,5 @@ post_analysis.ipynb
 wandb/run-20240626_205217-20h2ghze/run-20h2ghze.wandb
 /sweep_config
 script/NNSPN_paper/sweep_config/
+post/Attention_paper/
+*.npz
