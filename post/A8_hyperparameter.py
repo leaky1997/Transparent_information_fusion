@@ -1,6 +1,6 @@
 import sys
 sys.path.append('./')
-from post.A1_plot_config import configure_matplotlib
+from A1_plot_config import configure_matplotlib
 configure_matplotlib(style='ieee', font_lang='en')
 
 import numpy as np

@@ -97,11 +97,11 @@ def parse_arguments(parser):
     with open(yaml_dir, 'r') as f:
         config = yaml.safe_load(f)
     args = SimpleNamespace(**config['args'])
-
+    
     
     # dataset = args.data_dir[-3:].replace('/','')
     time_stamp = time.strftime("%d-%H-%M-%S", time.localtime())
-    name = f'bestmodel_{args.model}time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_scale{args.scale}_dataset{args.dataset_task}'
+    name = f'model_{args.model}time{time_stamp}_lr{args.learning_rate}_epochs{args.num_epochs}_dataset{args.dataset_task}'
 
     print(f'Running experiment: {name}')
     
@@ -109,7 +109,7 @@ def parse_arguments(parser):
     path = 'save/' + f'task_{args.dataset_task}/'+f'model_{args.model}/' + name
     if not os.path.exists(path):
         os.makedirs(path)
-    
+    args.path = path
     return config,args,path
 
 def yaml_arguments(yaml_dir):

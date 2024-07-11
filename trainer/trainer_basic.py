@@ -8,8 +8,12 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torchmetrics
-from .utils import l1_reg,get_all_layers,wgn2
+from .utils import l1_reg,get_all_layers,wgn2,sim_reg,mixup
 import numpy as np
+
+def check_attr(args,attr = 'attention_norm'):
+    if not hasattr(args, attr):
+        setattr(args, attr, False)
 
 class Basic_plmodel(pl.LightningModule):
     def __init__(self, network,args):
@@ -32,7 +36,13 @@ class Basic_plmodel(pl.LightningModule):
         return self.network(x)
 
     def training_step(self, batch, batch_idx):
+        
+        check_attr(self.args,'mixup')
+        if self.args.mixup:
+            batch = mixup(batch,alpha = self.args.mixup)
+            
         x, y = batch
+        
         if self.args.snr:
             # print('add noise')
             snr = np.random.randint(self.args.snr,0) if self.args.snr < 0 else np.random.randint(0,self.args.snr)
@@ -54,7 +64,13 @@ class Basic_plmodel(pl.LightningModule):
             regularization_loss = self.update_regularization_loss()      
                           
             loss += self.args.l1_norm * regularization_loss          
-            self.log('l1_loss_', regularization_loss,prog_bar =True,sync_dist=True)    
+            self.log('l1_loss_', regularization_loss,prog_bar =True,sync_dist=True)   
+        
+        check_attr(self.args,'attention_norm') 
+        if self.args.attention_norm:
+            attention_loss = self.update_attention_loss()
+            loss += self.args.attention_norm * attention_loss
+            self.log('attention_loss', attention_loss,prog_bar =True,sync_dist=True)
         
         
         return loss
@@ -65,6 +81,35 @@ class Basic_plmodel(pl.LightningModule):
             if 'WF' not in name:
                 regularization_loss += l1_reg(param = param)
         return regularization_loss
+    
+    def update_attention_loss(self):
+        regularization_loss = 0
+
+        for layer in self.network.signal_processing_layers:
+            gate_value = layer.channel_attention.gate
+            regularization_loss += sim_reg(tensor = gate_value)
+            
+        gate_value = self.network.feature_extractor_layers.FEAttention.gate
+        regularization_loss += sim_reg(tensor = gate_value)
+        
+        return regularization_loss
+    # def update_attention_loss(self):
+    #     diversity_loss = 0
+    #     gate_values = []
+
+    #     for layer in self.network.signal_processing_layers:
+    #         gate_value = layer.channel_attention.gate
+    #         gate_values.append(gate_value)
+        
+    #     gate_value = self.network.feature_extractor_layers.FEAttention.gate
+    #     gate_values.append(gate_value)
+
+    #     for i in range(len(gate_values)):
+    #         for j in range(i + 1, len(gate_values)):
+    #             diversity_loss += cosine_similarity(gate_values[i], gate_values[j]).mean()
+
+    # return diversity_loss
+    
     
     def validation_step(self, batch, batch_idx):
         # self.eval()

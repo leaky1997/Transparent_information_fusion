@@ -1,8 +1,8 @@
 signal_processing_configs:
-  layer1: ['Mul','WF','Morlet','Laplace','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter']  
-  layer2: ['Mul','WF','Morlet','Laplace','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter']    
-  layer3: ['Mul','WF','Morlet','Laplace','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter']    
-  layer4: ['Mul','WF','Morlet','Laplace','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter']  
+  layer1: ['Mul','WF','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter','HT','I']  
+  layer2: ['Mul','WF','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter','HT','I']    
+  layer3: ['Mul','WF','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter','HT','I']    
+  # layer4: ['Mul','WF','Morlet','Laplace','Order1MAFilter','Order2MAFilter','Order2MAFilter','Order2DFFilter']  
 
 feature_extractor_configs: ['Mean', 'Std', 'Var', 'Entropy','Max', 'Min', 'AbsMean', 'Kurtosis', 'RMS', 'CrestFactor','Skewness', 'ClearanceFactor', 'ShapeFactor']
 
@@ -47,5 +47,5 @@ args:
   weight_decay: 0.0001
   l1_norm: 0.001
 
-  pruning: [0.7,0.5,0.01] # [0.7,0.5,0.01]
-  snr: 1
+  pruning: False # [0.7,0.5,0.01] # [0.7,0.5,0.01]
+  snr: False

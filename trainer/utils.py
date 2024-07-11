@@ -3,17 +3,50 @@ import torch
 import copy
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import LightningModule, Trainer
+import torch.nn.functional as F
+import numpy as np
 
+def cosine_similarity(x, y):
+    return F.cosine_similarity(x, y, dim=1)
+
+def random_shuffle_channels(tensor):
+    # 获取C通道的数量
+    C = tensor.size(1)
+    
+    # 生成随机的C通道索引
+    perm = torch.randperm(C)
+    
+    # 打乱C通道
+    shuffled_tensor = tensor[:, perm]
+
+    return shuffled_tensor
 
 def wgn2(x, snr):
     "加随机噪声"
     snr = 10**(snr/10.0)
     xpower = torch.sum(x**2)/(x.size(0)*x.size(1)*x.size(2))
     npower = xpower / snr
-    return torch.rand(x.size()).cuda() * torch.sqrt(npower) + x
+    return torch.rand(x.size()).cuda() * torch.sqrt(npower) + x 
 
 def l1_reg(param):
     return torch.sum(torch.abs(param))
+
+def sim_reg(tensor):
+    shuffle_tensor = random_shuffle_channels(tensor)
+    sim = cosine_similarity(tensor, shuffle_tensor)
+    sim_sum = l1_reg(sim)
+    return sim_sum
+    
+def mixup(batch,alpha = 0.8):
+    # mix_ratio = np.random.dirichlet(np.ones(3) * 0.9,size=1) # 设置为0.9
+    lamda = np.random.beta(alpha,alpha)
+    x,y = batch
+    index = torch.randperm(x.size(0)).cuda()
+    
+    x = lamda * x + (1-lamda) * x[index]
+    y = lamda * y + (1-lamda) * y[index]
+        
+    return x,y
 
 import pandas as pd
 import os

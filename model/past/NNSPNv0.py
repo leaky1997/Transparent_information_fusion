@@ -11,45 +11,26 @@ from torch.nn import init
 
 
 class ChannelAttention(nn.Module):
-    def __init__(self, channel, reduction=16, topk=10):
+    def __init__(self,channel,reduction=16):
         super().__init__()
-        # self.maxpool=nn.AdaptiveMaxPool1d(1) # B,C,L -> B,C,1
-        self.varpool = lambda x: (((x - torch.mean(x, dim=-1, keepdim=True)) ** 2).mean(dim=-1, keepdim=True))
-        self.avgpool = nn.AdaptiveAvgPool1d(1)
-        self.se1 = nn.Sequential(
-            nn.Conv1d(channel, channel // reduction, 1, bias=False), # = linear
+        self.maxpool=nn.AdaptiveMaxPool1d(1) # B,C,L -> B,C,1
+        self.avgpool=nn.AdaptiveAvgPool1d(1)
+        self.se=nn.Sequential(
+            nn.Conv1d(channel,channel//reduction,1,bias=False),
             nn.ReLU(),
-            nn.Conv1d(channel // reduction, channel, 1, bias=False)
+            nn.Conv1d(channel//reduction,channel,1,bias=False)
         )
-        self.se2 = nn.Sequential(
-            nn.Conv1d(channel, channel // reduction, 1, bias=False), # = linear
-            nn.ReLU(),
-            nn.Conv1d(channel // reduction, channel, 1, bias=False)
-        )
-        self.sigmoid = nn.Sigmoid()
+        # self.sigmoid=nn.Sigmoid()
         self.softmax = nn.Softmax(dim=1)
-        self.topk = topk
-
-    def sparser(self, x, topk):
-        # Get the topk values and their indices
-        topk_values, topk_indices = torch.topk(x, topk, dim=1)
-        # Create a mask for the topk values
-        mask = torch.zeros_like(x, dtype=torch.bool)
-        mask.scatter_(1, topk_indices, True)
-        # Set the values not in the topk to negative infinity
-        x[~mask] = float('-inf')
-        return x
-
+    
     def forward(self, x):
-        # x = rearrange(x, 'b l c -> b c l')
-        var_result = self.varpool(x)
-        avg_result = self.avgpool(x)
-        var_out = self.se1(var_result)
-        avg_out = self.se2(avg_result)
-        res = var_out + avg_out
-        res = self.sparser(res, self.topk)
+        x = rearrange(x, 'b l c -> b c l')
+        max_result=self.maxpool(x)
+        avg_result=self.avgpool(x)
+        max_out=self.se(max_result)
+        avg_out=self.se(avg_result)
         # output=self.sigmoid(max_out+avg_out)
-        output = self.softmax(res)
+        output = self.softmax(max_out+avg_out)
         return output
                     
 class TimeAttention(nn.Module):
@@ -73,6 +54,8 @@ class SPAttention(nn.Module):
         super().__init__()
         self.ca=ChannelAttention(channel=channel,reduction=reduction)
         # self.sa=TimeAttention(kernel_size=kernel_size)
+
+
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv1d):
@@ -86,6 +69,7 @@ class SPAttention(nn.Module):
                 init.normal_(m.weight, std=0.001)
                 if m.bias is not None:
                     init.constant_(m.bias, 0)
+
     def forward(self, x):
         b, l, c = x.size()
         x = rearrange(x, 'b l c -> b c l')
@@ -98,7 +82,56 @@ class SPAttention(nn.Module):
         return rearrange(res, 'b c l -> b l c')
 
 
+# class SPAttention(nn.Module):
 
+#     def __init__(self, channel=512,reduction=4):
+#         super().__init__()
+#         self.avg_pool = nn.AdaptiveAvgPool1d(1)
+#         self.fc = nn.Sequential(
+#             nn.Linear(channel, channel // reduction, bias=False),
+#             nn.ReLU(inplace=True),
+#             nn.Linear(channel // reduction, channel, bias=False),
+#             nn.Sigmoid()
+#         )
+
+#     def forward(self, x):
+#         b, l, c = x.size()
+#         x = rearrange(x, 'b l c -> b c l')
+#         y = self.avg_pool(x).view(b, c)
+#         y = self.fc(y).view(b, c,1)
+#         res = x * y
+#         return rearrange(res, 'b c l -> b l c')
+
+# class SPAttention(nn.Module):
+
+#     def __init__(self, channel=512,reduction=8):
+#         super().__init__()
+#         self.avg_pool = nn.AdaptiveAvgPool1d(1)
+
+#         self.fc = nn.Sequential(
+#             nn.Linear(channel, channel // reduction, bias=False),
+#             nn.ReLU(inplace=True),
+#             nn.Linear(channel // reduction, channel, bias=False),
+#             nn.Sigmoid()
+#         )
+
+#         self.k = lambda x: (((x - torch.mean(x, dim=-1, keepdim=True)) ** 4).mean(dim=-1, keepdim=True)) / ((torch.var(x, dim=-1, keepdim=True) ** 2) + 1e-6)
+#         self.norm = CustomBatchNorm(channel)
+
+#     def forward(self, x):
+#         b, l, c = x.size()
+
+#         x = rearrange(x, 'b l c -> b c l')
+#         # y_m = self.avg_pool(x).view(b, c) # normlized feature attention
+#         y_k = self.k(x).squeeze(-1) 
+
+#         y_k = self.norm(y_k)
+
+#         y_k = y_k
+
+#         y = self.fc(y_k).unsqueeze(-1)
+#         res = x * y
+#         return rearrange(res, 'b c l -> b l c')
 
 class CustomBatchNorm(nn.Module):
     def __init__(self, num_features, eps=0.1):

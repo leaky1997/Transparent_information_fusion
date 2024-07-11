@@ -58,7 +58,7 @@ def add_noise(x, snr):
     snr = 10**(snr/10.0)
     xpower = torch.sum(x**2)/(x.size(0)*x.size(1)*x.size(2))
     npower = xpower / snr
-    return torch.rand(x.size()).cuda() * torch.sqrt(npower) + x
+    return torch.randn(x.size()).cuda() * torch.sqrt(npower) + x
 
 def plot_accuracy_vs_snr(test_data, test_labels, model_dict, snr_levels, plot_dir='./plot'):
 
@@ -107,6 +107,36 @@ def record_noise_accuracy(test_data, test_labels, model, snr_levels, plot_dir, f
     model = model.cpu()
     torch.cuda.empty_cache()
     return accuracies
+
+def record_noise_attention(test_data, test_labels, model, snr_levels, plot_dir, file_name):
+    accuracies = []
+    test_data = torch.tensor(test_data).cuda()
+    test_labels = torch.tensor(test_labels).cuda()
+    model = model.cuda()
+    for snr in snr_levels:
+        noisy_data = add_noise(test_data, snr)
+        with torch.no_grad():
+            preds = model(noisy_data).argmax(dim=1)
+            signal_attention = model.signal
+                        
+        acc = (preds == test_labels).float().mean().item()
+        accuracies.append(acc)
+    pd.DataFrame(accuracies, columns=['Accuracy']).to_csv(os.path.join(plot_dir, f'{file_name}_noise_accuracy_list.csv'), index=False)
+    model = model.cpu()
+    torch.cuda.empty_cache()
+    return accuracies
+
+def parse_attention(noisy_data,model):
+    
+    model = model.cuda()
+    model(torch.tensor(noisy_data).float().cuda())
+
+    model = model.network
+    SP_attentions = []
+    for layer in model.signal_processing_layers:
+        SP_attentions.append(layer.channel_attention.gate)
+    FE_attention = model.feature_extractor_layers.FEAttention.gate
+    return SP_attentions,FE_attention
 
 # # 设置噪声级别范围
 # snr_levels = np.arange(-5, 16, 1)  # 示例：从-5dB到15dB
