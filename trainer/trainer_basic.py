@@ -37,9 +37,7 @@ class Basic_plmodel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         
-        check_attr(self.args,'mixup')
-        if self.args.mixup:
-            batch = mixup(batch,alpha = self.args.mixup)
+
             
         x, y = batch
         
@@ -50,6 +48,12 @@ class Basic_plmodel(pl.LightningModule):
             
         y_hat = self(x)
         loss = self.loss(y_hat, y.long())
+        
+        check_attr(self.args,'mixup')
+        if self.args.mixup:
+            x_mix,y_mix = mixup(batch,alpha = self.args.mixup)
+            y_hat_mix = self(x_mix)
+            loss += self.loss(y_hat_mix, y_mix.long())
 
         acc = self.acc_train(y_hat, y.long())  # torch.argmax(y_hat,dim =1)
         

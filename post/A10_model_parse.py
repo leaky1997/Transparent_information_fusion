@@ -84,6 +84,10 @@ def draw_network_structure(layer_top_weight,precision = 6,
         pos[node] = (layer_levels[layer], -layer)
         layer_levels[layer] += 1
 
+
+###############################################
+
+
     # 绘图
     # plt.figure(figsize=(12, 8))
     # nx.draw(G, pos, with_labels=True, node_size=2600, node_color="cornflowerblue", font_size=40, font_weight="bold", 
@@ -165,6 +169,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 
+
+
+
+
 def signal_vis_weight(model, path='./plot', name='', k=20, weight_flag='weight_connection'):
     """
     绘制模型信号处理层的权重热力图。
@@ -195,16 +203,72 @@ def signal_vis_weight(model, path='./plot', name='', k=20, weight_flag='weight_c
         plt.savefig(path + f'/{weight_flag}{name}_layer{idx}.svg', dpi=256) 
         plt.show()  # 显示图形
 
-# 示例使用
-# 假设有一个模型 model，您需要在这里正确地创建或加载模型
-# signal_weight(model)
 
-# layer_top_weight = {}
-# for idx, layer in enumerate(network.signal_processing_layers):
-#     result_list = get_top_k_weights(idx, layer,k=20)
-#     layer_top_weight[f'layer:{idx}'] = result_list
-#     print(result_list)
+def parse_attention(noisy_data,model):
     
-    
+    model = model.cuda()
+    model(torch.tensor(noisy_data).float().cuda())
 
-# parse 主要网络配置
+    model = model.network
+    SP_attentions = []
+    for layer in model.signal_processing_layers:
+        SP_attentions.append(layer.channel_attention.gate.squeeze().detach().cpu().numpy())
+    FE_attention = model.feature_extractor_layers.FEAttention.gate.squeeze().detach().cpu().numpy()
+    return SP_attentions,FE_attention
+
+def visualize_Attention(sparse_matrix, labels,channel_groups, path='./plot', name=''): 
+    plt.rcParams['font.family'] = 'Times New Roman'  # 设置字体为新罗马
+
+# 设置绘图风格
+    sns.set_theme(style="whitegrid",font='Times New Roman',font_scale=1.4)
+    sns.set_palette("Set2")
+# sns.set(style="whitegrid", context="talk")
+
+# 创建一个大的绘图区域，包含多个子图
+    fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+
+# 第一个子图：热力图
+    sns.heatmap(sparse_matrix, ax=axs[0, 0], cmap="GnBu", cbar_kws={'label': 'Weight'}, alpha=0.8) # jet cmap="jet",
+    axs[0, 0].set_title('Heatmap of Sparse Matrix')
+    axs[0, 0].set_xlabel('Channel')
+    axs[0, 0].set_ylabel('Sample')
+
+# 第二个子图：矩阵中的非零元素位置
+    axs[0, 1].spy(sparse_matrix, markersize=5, color='r')
+    axs[0, 1].set_title('Selected node')
+    axs[0, 1].grid(True)
+    axs[0, 1].set_xlabel('Channel')
+    axs[0, 1].set_ylabel('Sample')
+
+# 第三个子图：根据类别绘制累积的样本权重分布
+    unique_categories = np.unique(labels)
+    for category in unique_categories:
+        category_mask = (labels == category)
+        accumulated_weights = sparse_matrix[category_mask].sum(axis=0)
+    # axs[1, 0].plot(accumulated_weights, marker='o', label=f'Category {category}')
+        x_positions = range(len(accumulated_weights))  # 生成x轴位置
+        axs[1, 0].bar(x_positions, accumulated_weights, label=f'Category {category}', width=0.8,alpha=0.5)  # 使用bar绘制柱状图
+    axs[1, 0].set_title('Accumulated attention by sample category')
+    axs[1, 0].set_xlabel('Channel')
+    axs[1, 0].set_ylabel('Accumulated Weight')
+    axs[1, 0].grid(True)
+    axs[1, 0].set_xticks(x_positions)
+    axs[1, 0].legend(loc='upper right', fontsize='small')
+
+# 第四个子图：根据通道类别绘制累积的权重分布
+    for group_idx, group in enumerate(channel_groups):
+        accumulated_weights = sparse_matrix[:, group].sum(axis=1)
+        axs[1, 1].plot(accumulated_weights, marker='x', label=f'Channel Group {group_idx+1}')
+    axs[1, 1].set_title('Accumulated attention by channel group')
+    axs[1, 1].set_xlabel('Sample')
+    axs[1, 1].set_ylabel('Accumulated Weight')
+    axs[1, 1].grid(True)
+    axs[1, 1].legend(loc='upper right', fontsize='small')
+
+# 调整布局，使子图不重叠
+    plt.tight_layout()
+
+# 显示图形
+    plt.savefig(path + f'/Attention{name}.pdf', dpi=256)  # 保存为PDF
+    plt.savefig(path + f'/Attention{name}.svg', dpi=256)
+    plt.show()

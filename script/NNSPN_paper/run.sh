@@ -2,7 +2,7 @@
 CUDA_VISIBLE_DEVICES=0
 
 # CUDA_VISIBLE_DEVICES=7 python main.py --config_dir configs/THU_006/config_NNSPN_gen.yaml #
-CUDA_VISIBLE_DEVICES=6 python main.py --config_dir configs/THU_006/config_NNSPN_gen.yaml #
+CUDA_VISIBLE_DEVICES=7 python main.py --config_dir configs/THU_006/config_NNSPN_gen.yaml #
 CUDA_VISIBLE_DEVICES=6 python main.py --config_dir configs/THU_006/config_NNSPN.yaml
 # DIRG
 

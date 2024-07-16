@@ -14,8 +14,8 @@ args:
   device: cuda
   data_dir: '/home/user/data/a_bearing/a_020_DIRG_pro/' # '/home/user/data/a_bearing/a_006_THU_pro/LQ_fusion/' '/home/user/data/a_bearing/a_018_THU24_pro/'
   dataset_task: DIRG_020_geberalization # THU_006_basic THU_006_generalization THU_006_fusion THU_018_basic THU_018_generalization THU_018_fusion
-  source: ['100','200','400','500']
-  target: ['300'] # if basic or generalization 1hz 10hz 15hz
+  source: ['100','300','400','500']
+  target: ['200'] # if basic or generalization 1hz 10hz 15hz
   k_shot: 64
 
 
@@ -35,7 +35,7 @@ args:
   f_b_sigma: 0.1
 
 # hyperparameter
-  learning_rate: 0.002
+  learning_rate: 0.001
   batch_size: 512
   num_epochs: 300
   num_workers: 32
@@ -46,11 +46,11 @@ args:
   patience: 100
   gpus: 1
   weight_decay: 0.0001
-  l1_norm: 0.005
+  l1_norm: 0.001
 
   log_parameters: True
 
   pruning: False # [0.7,0.5,0.01]
 
   snr: False
-  mixup: 0.9
+  mixup: False
