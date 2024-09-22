@@ -86,14 +86,17 @@ class SPAttention(nn.Module):
                 init.normal_(m.weight, std=0.001)
                 if m.bias is not None:
                     init.constant_(m.bias, 0)
-    def forward(self, x):
+    def forward(self, x, output_flag = None):
         b, l, c = x.size()
         x = rearrange(x, 'b l c -> b c l')
         residual=x
         self.gate = self.ca(x)
+        self.x = x # for visualization
         out=x*self.gate
         # out=out*self.sa(out)
         res = out + residual
+        
+        # del self.x, self.gate
 
         return rearrange(res, 'b c l -> b l c')
 

@@ -20,5 +20,7 @@ python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_onl
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_onlyMean.yaml
 python main_ablation_exp.py --config_dir configs/THU_018ablation/config_TSPN_woWF.yaml
 
+
+
 sensors | grep "Core"
 nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader

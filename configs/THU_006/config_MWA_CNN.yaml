@@ -43,4 +43,4 @@ args:
   l1_norm: 0.0001
 
   pruning: None # [0.7,0.5,0.01]
-  snr: 1
+  snr: 4

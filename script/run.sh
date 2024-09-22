@@ -3,11 +3,11 @@ CUDA_VISIBLE_DEVICES=0
 
 python main.py --config_dir configs/THU_006/config_TSPN.yaml
 python main.py --config_dir configs/THU_006/config_TKAN.yaml
-python main.py --config_dir configs/THU_006/config_NNSPN.yaml
+CUDA_VISIBLE_DEVICES=7 python main.py --config_dir configs/THU_006/config_NNSPN.yaml
 
 python main_com.py --config_dir configs/THU_006/config_Resnet.yaml 
-python main_com.py --config_dir configs/THU_006/config_Sincnet.yaml 
-python main_com.py --config_dir configs/THU_006/config_WKN.yaml
+CUDA_VISIBLE_DEVICES=7 python main_com.py --config_dir configs/THU_006/config_Sincnet.yaml 
+CUDA_VISIBLE_DEVICES=7 python main_com.py --config_dir configs/THU_006/config_WKN.yaml
 python main_com.py --config_dir configs/THU_006/config_MWA_CNN.yaml 
 
 # 006 gen

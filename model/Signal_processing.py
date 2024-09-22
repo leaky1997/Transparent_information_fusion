@@ -150,13 +150,13 @@ class WaveFilters(SignalProcessingBase):
     def filter_generator(self, in_channels, freq_length): 
         omega = torch.linspace(0, 0.5, freq_length, device=self.device).view(1, -1, 1)
         
-        self.omega = omega.reshape(1, 1, freq_length).repeat([1, in_channels, 1])
+        self.omega = omega.reshape(1, freq_length, 1).repeat([1, 1, in_channels])
         
-        filters = torch.exp(-((omega - self.f_c) / (2 * self.f_b)) ** 2)
+        filters = torch.exp(-((self.omega - self.f_c) / (2 * self.f_b)) ** 2)
         return filters
 
     def forward(self, x): 
-        in_dim, in_channels = x.shape[-2],x.shape[-1]
+        in_dim, in_channels = x.shape[-2],x.shape[-1] # B,L,C
         freq = torch.fft.rfft(x, dim=1, norm='ortho')
         
         self.filters = self.filter_generator(in_channels, in_dim//2 + 1)

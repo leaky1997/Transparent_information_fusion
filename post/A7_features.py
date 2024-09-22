@@ -10,8 +10,12 @@ import pandas as pd
 
 
 def data_to_tsne_dict(feature_dict):
+    '''
+    function: 
+    '''
     tsne_dict = {}
     for model_name, features in feature_dict.items():
+        print('model_name:',model_name)
         # assert features is numpy array 如果是tensor需要转换features.numpy()
         assert isinstance(features, np.ndarray)
         # 假设model对象有一个返回特征的方法get_features
@@ -132,7 +136,52 @@ def plot_scatter_from_dict(features, labels,boarder, name='default',sample = 25,
     plt.savefig(os.path.join(plot_dir, f'{name}_scatter_gen.svg'))
     plt.show()
     plt.close()
+#%%
 
+def plot_scatter_from_dict_with_domain(features, labels, conditions, name='default', sample=25, plot_dir='./plot'):
+    # 设置标记和颜色
+    markers = ['o', 'X', '*', 'P', 's', 'D', '<', '>', '^', 'v']
+    colors = plt.cm.Set2(np.linspace(0, 1, len(np.unique(labels))))
+
+    # 确保保存目录存在
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+
+    plt.figure()
+    print('plot model:', name)
+
+    num_classes = int(labels.max() + 1)
+    num_conditions = int(conditions.max() + 1)
+
+    # 分别绘制每个类别和条件的散点图
+    for i in range(num_classes):
+        for j in range(num_conditions):
+            
+            idxs = (labels == i) & (conditions == j)
+
+            feature_x = features[idxs, 0][:sample]
+            feature_y = features[idxs, 1][:sample]
+
+            plt.scatter(feature_x, feature_y,
+                        marker=markers[i % len(markers)],
+                        color=colors[j % len(colors)],
+                        label=f'$C_{i}D_{j}$',
+                        alpha=0.8,
+                        facecolors='none',  # 使标记只显示边缘
+                        edgecolors=colors[j % len(colors)]                    
+                        )
+
+    plt.legend(loc='best', fontsize='small', frameon=True, framealpha=0.4)
+    # plt.title(name)
+    plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.5)
+    plt.tight_layout()
+
+    # 保存图形
+    plt.savefig(os.path.join(plot_dir, f'{name}_scatter_gen.png'),dpi = 512, transparent=True)
+    plt.savefig(os.path.join(plot_dir, f'{name}_scatter_gen.pdf'), transparent=True)
+    plt.savefig(os.path.join(plot_dir, f'{name}_scatter_gen.svg'), transparent=True)
+    plt.show()
+    plt.close()
 
 ############################################ signal features
 

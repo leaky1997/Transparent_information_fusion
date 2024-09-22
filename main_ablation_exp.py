@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(description='TSPN')
 parser.add_argument('--config_dir', type=str, default='configs/config_basic.yaml',
                     help='The directory of the configuration file')
 configs,args,path = parse_arguments(parser)
-seed_everything(args.seed)    
+seed_everything(args.seed)
 
 # 初始化模型
 # 初始化模型
